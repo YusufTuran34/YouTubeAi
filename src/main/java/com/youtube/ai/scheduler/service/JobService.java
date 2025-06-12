@@ -4,6 +4,8 @@ package com.youtube.ai.scheduler.service;
 import com.youtube.ai.scheduler.model.Job;
 import com.youtube.ai.scheduler.repository.JobRepository;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
@@ -15,6 +17,8 @@ import java.util.concurrent.ScheduledFuture;
 
 @Service
 public class JobService {
+
+    private static final Logger logger = LoggerFactory.getLogger(JobService.class);
 
     private final JobRepository jobRepository;
     private final TaskScheduler scheduler;
@@ -35,10 +39,11 @@ public class JobService {
 
     public void scheduleJob(Job job) {
         Runnable task = () -> {
+            logger.info("Scheduled job '{}' triggered", job.getName());
             try {
                 runJob(job);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error executing job '{}'", job.getName(), e);
             }
         };
         ScheduledFuture<?> future = scheduler.schedule(task, new CronTrigger(job.getCronExpression()));
@@ -51,7 +56,10 @@ public class JobService {
         if (job.getNextScript1() != null) scripts.add(job.getNextScript1());
         if (job.getNextScript2() != null) scripts.add(job.getNextScript2());
 
+        logger.info("Starting job '{}' with scripts {}", job.getName(), scripts);
+
         for (String script : scripts) {
+            logger.info("Running script {} for job {}", script, job.getName());
             ProcessBuilder pb = new ProcessBuilder("bash", script);
             pb.redirectErrorStream(true);
             Process proc = pb.start();
@@ -63,7 +71,7 @@ public class JobService {
                 }
             }
             int exitCode = proc.waitFor();
-            System.out.println("Job completed with exit code: " + exitCode);
+            logger.info("Script {} completed for job {} with exit code {}", script, job.getName(), exitCode);
         }
     }
 
