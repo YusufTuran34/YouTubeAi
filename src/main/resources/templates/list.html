@@ -1,11 +1,15 @@
 
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Job List</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Job List</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+</head>
 <body>
 <h2>Tanımlı Görevler</h2>
 <a href="/jobs/new">Yeni Görev</a>
-<table border="1">
+<table>
 <tr><th>Ad</th><th>Script</th><th>Cron</th><th>İşlem</th></tr>
 <tr th:each="job : ${jobs}">
     <td th:text="${job.name}">Ad</td>

@@ -1,7 +1,11 @@
 
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Yeni Görev</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Yeni Görev</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+</head>
 <body>
 <h2>Yeni Zamanlanmış SH Görevi</h2>
 <form action="/jobs" method="post" th:object="${job}">
