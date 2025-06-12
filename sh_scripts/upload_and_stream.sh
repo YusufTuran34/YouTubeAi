@@ -1,7 +1,7 @@
 #!/bin/bash
 # upload_and_stream.sh - output.mp4 ve remote_stream.sh dosyasını sunucuya gönderip yayın başlatır
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.sh}"
+CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 else
@@ -21,7 +21,7 @@ if [ ! -f "$PEM_FILE" ]; then
 fi
 
 echo ">> Dosyalar sunucuya gönderiliyor..."
-scp -i "$PEM_FILE" "$OUTPUT_VIDEO" remote_stream.sh config.sh "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/"
+scp -i "$PEM_FILE" "$OUTPUT_VIDEO" remote_stream.sh config.conf "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/"
 if [ $? -ne 0 ]; then
     echo "HATA: Dosya gönderimi başarısız oldu!" >&2
     exit 1

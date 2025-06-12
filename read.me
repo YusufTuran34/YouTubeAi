@@ -3,7 +3,7 @@
 This project includes shell scripts for generating and uploading YouTube videos automatically. The title and description generation scripts now support using OpenAI for smarter, SEO friendly content.
 
 ## Configuration
-Create `sh_scripts/config.sh` and fill in your paths and API keys:
+Create `sh_scripts/config.conf` and fill in your paths and API keys:
 
 ```bash
 VIDEO_FILE="sample.mp4"        # Input video
@@ -20,3 +20,8 @@ sh sh_scripts/generate_description.sh
 ```
 
 If `OPENAI_API_KEY` is not set or the API call fails, the scripts fall back to basic templates.
+Use helper scripts for common tasks:
+
+- `sh sh_scripts/run_generation_pipeline.sh` - generate video, description, thumbnail and title sequentially.
+- `sh sh_scripts/run_pipeline_and_upload.sh <hours>` - optional duration parameter then upload the result.
+- `sh sh_scripts/run_video_and_stream.sh <hours>` - generate a long video and start streaming.

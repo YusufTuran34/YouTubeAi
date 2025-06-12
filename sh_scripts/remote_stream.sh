@@ -1,7 +1,7 @@
 #!/bin/bash
 # remote_stream.sh - Sunucuda çalışır, gerekli ortamı kurar ve yayını başlatır
 
-CONFIG_FILE="config.sh"
+CONFIG_FILE="config.conf"
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 else
