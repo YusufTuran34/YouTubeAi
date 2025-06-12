@@ -1,5 +1,5 @@
 
-package com.example.scheduler.model;
+package com.youtube.ai.scheduler.model;
 
 import jakarta.persistence.*;
 

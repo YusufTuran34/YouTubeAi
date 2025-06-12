@@ -1,8 +1,8 @@
 
-package com.example.scheduler.service;
+package com.youtube.ai.scheduler.service;
 
-import com.example.scheduler.model.Job;
-import com.example.scheduler.repository.JobRepository;
+import com.youtube.ai.scheduler.model.Job;
+import com.youtube.ai.scheduler.repository.JobRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
