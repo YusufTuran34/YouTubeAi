@@ -1,5 +1,5 @@
 
-package com.example.scheduler;
+package com.youtube.ai.scheduler;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

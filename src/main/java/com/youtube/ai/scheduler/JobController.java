@@ -1,8 +1,8 @@
 
-package com.example.scheduler;
+package com.youtube.ai.scheduler;
 
-import com.example.scheduler.model.Job;
-import com.example.scheduler.service.JobService;
+import com.youtube.ai.scheduler.model.Job;
+import com.youtube.ai.scheduler.service.JobService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
