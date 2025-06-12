@@ -1,11 +1,51 @@
-# Default configuration for YouTube AI scripts
+# === Video ve Müzik Ayarları ===
+MUSIC_DIR="./mp3"
+OUTPUT_VIDEO="./output.mp4"
+VIDEO_DURATION_HOURS=0.0833
+
+VIDEO_CODEC="libx264"
+AUDIO_CODEC="aac"
+AUDIO_BITRATE="160k"
+GIF_FPS=30
+PRESET="ultrafast"
+
+# === YouTube Yayın Ayarları ===
+YOUTUBE_STREAM_URL="rtmp://a.rtmp.youtube.com/live2"
+YOUTUBE_STREAM_KEY="***"
+
+# === Yerel veya Drive Video Ayarları ===
+VIDEO_SOURCE_DIR="./video"
+USE_GOOGLE_DRIVE=1
+DRIVE_FOLDER_ID="1SevV-LKA67CVmEimWUwWicdJ0Eud6nHm"
+
+# === SSH Bağlantı Ayarları ===
+PEM_FILE="youtuber-streamer-1.pem"
+REMOTE_USER="ubuntu"
+REMOTE_HOST="ec2-52-57-139-84.eu-central-1.compute.amazonaws.com"
+REMOTE_DIR="/home/ubuntu"
+
+
+# === Jamendo Ayarları ===
+USE_JAMENDO=1
+CLIENT_ID="***"
+TAG="lofi"
+
+
+# UPLOADER
+
+# OAuth2 API bilgileri
+CLIENT_ID="***"
+CLIENT_SECRET="***"
+REFRESH_TOKEN="***"
+
+# Video bilgileri
+VIDEO_CATEGORY="22"
+VIDEO_PRIVACY="unlisted"
+THUMBNAIL_FILE="thumbnail.jpg"
 # Paths
-VIDEO_FILE="sample.mp4"         # Input video file
-OUTPUT_VIDEO="output.mp4"       # Final generated video
-THUMBNAIL_FILE="thumbnail.jpg"  # Output thumbnail
 
 # SEO/AI Settings
-OPENAI_API_KEY=""
+OPENAI_API_KEY="***"
 OPENAI_MODEL="gpt-3.5-turbo"
 KEYWORDS="lofi, study music, chillhop"
 

@@ -7,12 +7,12 @@ if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 fi
 
-if [ -z "$VIDEO_FILE" ] || [ ! -f "$VIDEO_FILE" ]; then
-    echo "Video dosyası bulunamadı: $VIDEO_FILE" >&2
+if [ -z "$OUTPUT_VIDEO" ] || [ ! -f "$OUTPUT_VIDEO" ]; then
+    echo "Video dosyası bulunamadı: $OUTPUT_VIDEO" >&2
     exit 1
 fi
 
-DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$VIDEO_FILE")
+DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$OUTPUT_VIDEO")
 DURATION_INT=${DURATION%.*}
 
 DESCRIPTION=""
