@@ -1,7 +1,7 @@
 #!/bin/bash
 # generate_title.sh - Use OpenAI to create an SEO friendly title
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.sh}"
+CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
 if [ -f "$CONFIG_FILE" ]; then
     # shellcheck disable=SC1090
     source "$CONFIG_FILE"

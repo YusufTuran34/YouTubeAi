@@ -5,9 +5,9 @@ set -e
 set -x
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/config.sh"
+CONFIG_FILE="$SCRIPT_DIR/config.conf"
 if [ ! -f "$CONFIG_FILE" ]; then
-  echo "HATA: config.sh bulunamadı! Lütfen script ile aynı dizine koyun ve ayarları yapın."
+  echo "HATA: config.conf bulunamadı! Lütfen script ile aynı dizine koyun ve ayarları yapın."
   exit 1
 fi
 . "$CONFIG_FILE"

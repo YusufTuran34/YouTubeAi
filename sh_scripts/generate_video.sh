@@ -6,7 +6,7 @@ rm -f /tmp/audio_list.txt /tmp/audio_list_ext.txt
 rm -rf /tmp/video_folder
 rm -f "$OUTPUT_VIDEO"
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.sh}"
+CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 else

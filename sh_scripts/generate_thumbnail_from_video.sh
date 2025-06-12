@@ -1,7 +1,7 @@
 #!/bin/bash
-# generate_thumbnail_from_video.sh - config.sh üzerinden belirlenen video dosyasından thumbnail üretir
+# generate_thumbnail_from_video.sh - config.conf üzerinden belirlenen video dosyasından thumbnail üretir
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.sh}"
+CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 else
@@ -10,7 +10,7 @@ else
 fi
 
 if [ -z "$OUTPUT_VIDEO" ]; then
-    echo "HATA: VIDEO_FILE config.sh içinde tanımlı değil." >&2
+    echo "HATA: VIDEO_FILE config.conf içinde tanımlı değil." >&2
     exit 1
 fi
 
