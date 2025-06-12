@@ -1,0 +1,21 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Job List</title></head>
+<body>
+<h2>Tanımlı Görevler</h2>
+<a href="/jobs/new">Yeni Görev</a>
+<table border="1">
+<tr><th>Ad</th><th>Script</th><th>Cron</th><th>İşlem</th></tr>
+<tr th:each="job : ${jobs}">
+    <td th:text="${job.name}">Ad</td>
+    <td th:text="${job.scriptPath}">Script</td>
+    <td th:text="${job.cronExpression}">Cron</td>
+    <td>
+        <a th:href="@{'/jobs/run/' + ${job.id}}">Çalıştır</a>
+        <a th:href="@{'/jobs/delete/' + ${job.id}}">Sil</a>
+    </td>
+</tr>
+</table>
+</body>
+</html>

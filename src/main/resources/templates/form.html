@@ -1,0 +1,17 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Yeni Görev</title></head>
+<body>
+<h2>Yeni Zamanlanmış SH Görevi</h2>
+<form action="/jobs" method="post" th:object="${job}">
+    <input type="text" th:field="*{name}" placeholder="Görev Adı"/><br/>
+    <input type="text" th:field="*{scriptPath}" placeholder="Ana SH Dosyası"/><br/>
+    <input type="text" th:field="*{cronExpression}" placeholder="Cron İfadesi (örn: 0 0 * * *)"/><br/>
+    <input type="text" th:field="*{nextScript1}" placeholder="2. SH (isteğe bağlı)"/><br/>
+    <input type="text" th:field="*{nextScript2}" placeholder="3. SH (isteğe bağlı)"/><br/>
+    <label>Aktif mi? <input type="checkbox" th:field="*{active}"/></label><br/>
+    <button type="submit">Kaydet</button>
+</form>
+</body>
+</html>
