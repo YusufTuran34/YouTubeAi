@@ -77,6 +77,9 @@ public class JobService {
                 command.addAll(Arrays.asList(params));
             }
             ProcessBuilder pb = new ProcessBuilder(command);
+            if (job.getChannel() != null) {
+                pb.environment().put("CHANNEL", job.getChannel());
+            }
             pb.redirectErrorStream(true);
             Process proc = pb.start();
             try (BufferedReader reader = new BufferedReader(
@@ -131,8 +134,12 @@ public class JobService {
     }
 
     public void delete(Long id) {
-        scheduledTasks.get(id).cancel(true);
-        scheduledTasks.remove(id);
+        ScheduledFuture<?> future = scheduledTasks.get(id);
+        if (future != null) {
+            future.cancel(true);
+            scheduledTasks.remove(id);
+        }
+        jobRunRepository.deleteAll(jobRunRepository.findByJobIdOrderByRunTimeDesc(id));
         jobRepository.deleteById(id);
     }
 

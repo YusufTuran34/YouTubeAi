@@ -3,7 +3,9 @@
 # Usage: post_to_twitter.sh [--config FILE] [--tag TAG] [--url VIDEO_URL] [--message TEXT]
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/config.conf"
+CONFIG_OVERRIDE=""
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 MESSAGE=""
 TAG=""
 VIDEO_URL=""
@@ -11,7 +13,7 @@ VIDEO_URL=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --config)
-      CONFIG_FILE="$2"; shift 2;;
+      CONFIG_OVERRIDE="$2"; shift 2;;
     --tag)
       TAG="$2"; shift 2;;
     --url)
@@ -27,10 +29,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-if [ -f "$CONFIG_FILE" ]; then
-    # shellcheck disable=SC1090
-    source "$CONFIG_FILE"
-fi
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
 URL_FILE="$SCRIPT_DIR/latest_video_url.txt"
 if [ -z "$VIDEO_URL" ] && [ -f "$URL_FILE" ]; then
@@ -39,7 +38,7 @@ fi
 
 # Validate credentials
 if [ -z "$TWITTER_API_KEY" ] || [ -z "$TWITTER_API_SECRET" ] || [ -z "$TWITTER_ACCESS_TOKEN" ] || [ -z "$TWITTER_ACCESS_SECRET" ]; then
-    echo "Twitter API credentials are missing in config.conf" >&2
+    echo "Twitter API credentials are missing in channels.env" >&2
     exit 1
 fi
 

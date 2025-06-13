@@ -1,10 +1,10 @@
 #!/bin/bash
 # cleanup_outputs.sh - remove previous output video and mp3 files
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
-if [ -f "$CONFIG_FILE" ]; then
-    source "$CONFIG_FILE"
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_OVERRIDE="${1:-}"
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
 # Remove generated video if exists
 [ -n "$OUTPUT_VIDEO" ] && rm -f "$OUTPUT_VIDEO"

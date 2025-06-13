@@ -1,16 +1,12 @@
 #!/bin/bash
-# generate_thumbnail_from_video.sh - config.conf üzerinden belirlenen video dosyasından thumbnail üretir
+# generate_thumbnail_from_video.sh - base.conf ve kanal ayarlarını kullanarak video dosyasından thumbnail üretir
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
-if [ -f "$CONFIG_FILE" ]; then
-    source "$CONFIG_FILE"
-else
-    echo "HATA: Konfigürasyon dosyası bulunamadı: $CONFIG_FILE" >&2
-    exit 1
-fi
-
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_OVERRIDE="${1:-}"
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 if [ -z "$OUTPUT_VIDEO" ]; then
-    echo "HATA: VIDEO_FILE config.conf içinde tanımlı değil." >&2
+    echo "HATA: OUTPUT_VIDEO tanımlı değil." >&2
     exit 1
 fi
 

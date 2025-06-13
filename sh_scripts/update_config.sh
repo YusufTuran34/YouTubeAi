@@ -1,9 +1,9 @@
 #!/bin/bash
-# update_config.sh - Update a key in config.conf
+# update_config.sh - Update a key in a configuration file
 
 KEY=$1
 VALUE=$2
-CONFIG_FILE="${3:-$(dirname "$0")/config.conf}"
+CONFIG_FILE="${3:-$(dirname "$0")/configs/base.conf}"
 
 if [ -z "$KEY" ] || [ -z "$VALUE" ]; then
   echo "Usage: $0 KEY VALUE [CONFIG_FILE]" >&2

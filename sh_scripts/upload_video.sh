@@ -5,12 +5,10 @@ set -e
 set -x
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/config.conf"
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "HATA: config.conf bulunamadı! Lütfen script ile aynı dizine koyun ve ayarları yapın."
-  exit 1
-fi
-. "$CONFIG_FILE"
+CONFIG_OVERRIDE="${1:-}"
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
+CONFIG_FILE="$CONFIG_OVERRIDE"
 
 if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$REFRESH_TOKEN" ]; then
   echo "HATA: OAuth2 API bilgileri eksik."
