@@ -3,6 +3,8 @@ package com.youtube.ai.scheduler.service;
 
 import com.youtube.ai.scheduler.model.Job;
 import com.youtube.ai.scheduler.repository.JobRepository;
+import com.youtube.ai.scheduler.repository.JobRunRepository;
+import com.youtube.ai.scheduler.model.JobRun;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +24,12 @@ public class JobService {
 
     private final JobRepository jobRepository;
     private final TaskScheduler scheduler;
+    private final JobRunRepository jobRunRepository;
     private final Map<Long, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
 
-    public JobService(JobRepository jobRepository) {
+    public JobService(JobRepository jobRepository, JobRunRepository jobRunRepository) {
         this.jobRepository = jobRepository;
+        this.jobRunRepository = jobRunRepository;
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.initialize();
         this.scheduler = taskScheduler;
@@ -34,7 +38,10 @@ public class JobService {
     @PostConstruct
     public void scheduleAll() {
         List<Job> jobs = jobRepository.findAll();
-        jobs.stream().filter(Job::isActive).forEach(this::scheduleJob);
+        jobs.stream()
+                .filter(Job::isActive)
+                .sorted(Comparator.comparing(job -> Optional.ofNullable(job.getSequence()).orElse(Integer.MAX_VALUE)))
+                .forEach(this::scheduleJob);
     }
 
     public void scheduleJob(Job job) {
@@ -92,6 +99,13 @@ public class JobService {
         }
         job.setLastLog(log);
         jobRepository.save(job);
+
+        JobRun run = new JobRun();
+        run.setJob(job);
+        run.setRunTime(java.time.LocalDateTime.now());
+        run.setLog(log);
+        run.setExitCode(exitCode);
+        jobRunRepository.save(run);
     }
 
     public void runNow(Long jobId) {
@@ -105,7 +119,9 @@ public class JobService {
     }
 
     public List<Job> listJobs() {
-        return jobRepository.findAll();
+        List<Job> jobs = jobRepository.findAll();
+        jobs.sort(Comparator.comparing(job -> Optional.ofNullable(job.getSequence()).orElse(Integer.MAX_VALUE)));
+        return jobs;
     }
 
     public Job save(Job job) {

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Logs</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+</head>
+<body>
+<h2 th:text="${job.name}">Job</h2>
+<table>
+<tr><th>Zaman</th><th>Exit</th><th>Log</th></tr>
+<tr th:each="run : ${runs}">
+    <td th:text="${#temporals.format(run.runTime, 'yyyy-MM-dd HH:mm:ss')}">time</td>
+    <td th:text="${run.exitCode}">code</td>
+    <td th:text="${run.log}">log</td>
+</tr>
+</table>
+<a href="/jobs">Geri</a>
+</body>
+</html>

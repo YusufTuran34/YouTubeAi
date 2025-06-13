@@ -16,6 +16,7 @@ public class Job {
     private String nextScript1;
     private String nextScript2;
     private boolean active;
+    private Integer sequence;
 
     @Column(length = 2000)
     private String lastLog;
@@ -51,4 +52,7 @@ public class Job {
 
     public Integer getLastExitCode() { return lastExitCode; }
     public void setLastExitCode(Integer lastExitCode) { this.lastExitCode = lastExitCode; }
+
+    public Integer getSequence() { return sequence; }
+    public void setSequence(Integer sequence) { this.sequence = sequence; }
 }
