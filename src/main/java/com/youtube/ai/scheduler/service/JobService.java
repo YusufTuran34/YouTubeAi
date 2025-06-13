@@ -60,7 +60,14 @@ public class JobService {
 
         for (String script : scripts) {
             logger.info("Running script {} for job {}", script, job.getName());
-            ProcessBuilder pb = new ProcessBuilder("bash", script);
+            List<String> command = new ArrayList<>();
+            command.add("bash");
+            command.add(script);
+            if (job.getScriptParams() != null && !job.getScriptParams().isBlank()) {
+                String[] params = job.getScriptParams().split("\\s+");
+                command.addAll(Arrays.asList(params));
+            }
+            ProcessBuilder pb = new ProcessBuilder(command);
             pb.redirectErrorStream(true);
             Process proc = pb.start();
             try (BufferedReader reader = new BufferedReader(

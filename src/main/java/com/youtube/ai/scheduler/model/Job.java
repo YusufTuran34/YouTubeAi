@@ -11,6 +11,7 @@ public class Job {
 
     private String name;
     private String scriptPath;
+    private String scriptParams;
     private String cronExpression;
     private String nextScript1;
     private String nextScript2;
@@ -25,6 +26,9 @@ public class Job {
 
     public String getScriptPath() { return scriptPath; }
     public void setScriptPath(String scriptPath) { this.scriptPath = scriptPath; }
+
+    public String getScriptParams() { return scriptParams; }
+    public void setScriptParams(String scriptParams) { this.scriptParams = scriptParams; }
 
     public String getCronExpression() { return cronExpression; }
     public void setCronExpression(String cronExpression) { this.cronExpression = cronExpression; }
