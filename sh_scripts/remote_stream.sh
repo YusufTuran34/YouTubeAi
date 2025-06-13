@@ -1,13 +1,10 @@
 #!/bin/bash
 # remote_stream.sh - Sunucuda çalışır, gerekli ortamı kurar ve yayını başlatır
 
-CONFIG_FILE="config.conf"
-if [ -f "$CONFIG_FILE" ]; then
-    source "$CONFIG_FILE"
-else
-    echo "Konfigürasyon dosyası bulunamadı!" >&2
-    exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_OVERRIDE="${1:-}"
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
 RTMP_URL="${YOUTUBE_STREAM_URL}/${YOUTUBE_STREAM_KEY}"
 

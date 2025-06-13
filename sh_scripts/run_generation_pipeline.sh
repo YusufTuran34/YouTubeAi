@@ -2,7 +2,10 @@
 # run_generation_pipeline.sh - generates video, description, thumbnail and title sequentially.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_FILE="${1:-$SCRIPT_DIR/config.conf}"
+CONFIG_OVERRIDE="${1:-}"
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
+CONFIG_FILE="$CONFIG_OVERRIDE"
 
 set -e
 bash "$SCRIPT_DIR/cleanup_outputs.sh" "$CONFIG_FILE"

@@ -3,7 +3,7 @@
 This project includes shell scripts for generating and uploading YouTube videos automatically. The title and description generation scripts now support using OpenAI for smarter, SEO friendly content.
 
 ## Configuration
-Create `sh_scripts/config.conf` and fill in your paths and API keys:
+Shared settings live in `sh_scripts/configs/base.conf`. Example keys:
 
 ```bash
 VIDEO_FILE="sample.mp4"        # Input video
@@ -12,7 +12,30 @@ OPENAI_MODEL="gpt-3.5-turbo"   # Optional
 KEYWORDS="lofi, study music"
 ```
 
-Run the generator scripts pointing to this config file:
+Per-channel credentials are kept in `sh_scripts/channels.env` as a JSON array.
+Add a new object for each channel. Credentials are grouped by service:
+
+```bash
+CHANNEL_CONFIGS='[
+  {
+    "name": "default",
+    "youtube": {
+      "CLIENT_ID": "xxx",
+      "CLIENT_SECRET": "yyy",
+      "REFRESH_TOKEN": "zzz",
+      "STREAM_KEY": "stream"
+    },
+    "twitter": {
+      "API_KEY": "",
+      "API_SECRET": "",
+      "ACCESS_TOKEN": "",
+      "ACCESS_SECRET": ""
+    }
+  }
+]'
+```
+Source `channels.env` and set `CHANNEL` to pick a config before running scripts:
+You can override the file path with the `CHANNEL_ENV_FILE` environment variable.
 
 ```bash
 sh sh_scripts/generate_title.sh
@@ -35,7 +58,7 @@ will be passed to the script. For example a job with `scriptPath` set to
 and a standalone tweet job that calls `post_to_twitter.sh --tag lofi`.
 
 ## Twitter Posting
-Set your Twitter API credentials in `sh_scripts/config.conf`:
+Twitter credentials are read from the selected channel entry in `channels.env` or a channel specific config file:
 ```
 TWITTER_API_KEY="..."
 TWITTER_API_SECRET="..."

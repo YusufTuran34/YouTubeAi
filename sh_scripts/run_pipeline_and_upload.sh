@@ -5,7 +5,10 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Default values
 DURATION_HOURS=""
-CONFIG_FILE="$SCRIPT_DIR/config.conf"
+CONFIG_OVERRIDE=""
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}"
+CONFIG_FILE=""  # path passed to other scripts if override specified
 RUN_GENERATION=1
 RUN_UPLOAD=1
 POST_TWITTER=0
@@ -20,7 +23,7 @@ fi
 while [ $# -gt 0 ]; do
     case "$1" in
         --config)
-            CONFIG_FILE="$2"; shift 2;;
+            CONFIG_OVERRIDE="$2"; CONFIG_FILE="$2"; shift 2;;
         --no-generation)
             RUN_GENERATION=0; shift;;
         --no-upload)
@@ -34,16 +37,18 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-[ -n "$DURATION_HOURS" ] && bash "$SCRIPT_DIR/update_config.sh" VIDEO_DURATION_HOURS "$DURATION_HOURS" "$CONFIG_FILE"
-[ -n "$TAG" ] && bash "$SCRIPT_DIR/update_config.sh" TAG "$TAG" "$CONFIG_FILE"
+[ -n "$CONFIG_OVERRIDE" ] && load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
+
+[ -n "$DURATION_HOURS" ] && bash "$SCRIPT_DIR/update_config.sh" VIDEO_DURATION_HOURS "$DURATION_HOURS" "$CONFIG_OVERRIDE"
+[ -n "$TAG" ] && bash "$SCRIPT_DIR/update_config.sh" TAG "$TAG" "$CONFIG_OVERRIDE"
 
 if [ "$RUN_GENERATION" -eq 1 ]; then
-    bash "$SCRIPT_DIR/cleanup_outputs.sh" "$CONFIG_FILE"
-    bash "$SCRIPT_DIR/run_generation_pipeline.sh" "$CONFIG_FILE"
+    bash "$SCRIPT_DIR/cleanup_outputs.sh" "$CONFIG_OVERRIDE"
+    bash "$SCRIPT_DIR/run_generation_pipeline.sh" "$CONFIG_OVERRIDE"
 fi
 
 if [ "$RUN_UPLOAD" -eq 1 ]; then
-    UPLOAD_OUTPUT=$(bash "$SCRIPT_DIR/upload_video.sh" "$CONFIG_FILE")
+    UPLOAD_OUTPUT=$(bash "$SCRIPT_DIR/upload_video.sh" "$CONFIG_OVERRIDE")
     echo "$UPLOAD_OUTPUT"
     VIDEO_URL=$(echo "$UPLOAD_OUTPUT" | grep -o 'https://youtu.be/[A-Za-z0-9_-]*')
     if [ -n "$VIDEO_URL" ]; then
@@ -52,5 +57,5 @@ if [ "$RUN_UPLOAD" -eq 1 ]; then
 fi
 
 if [ "$POST_TWITTER" -eq 1 ]; then
-    bash "$SCRIPT_DIR/post_to_twitter.sh" "$CONFIG_FILE"
+    bash "$SCRIPT_DIR/post_to_twitter.sh" "$CONFIG_OVERRIDE"
 fi

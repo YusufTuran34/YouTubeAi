@@ -131,8 +131,12 @@ public class JobService {
     }
 
     public void delete(Long id) {
-        scheduledTasks.get(id).cancel(true);
-        scheduledTasks.remove(id);
+        ScheduledFuture<?> future = scheduledTasks.get(id);
+        if (future != null) {
+            future.cancel(true);
+            scheduledTasks.remove(id);
+        }
+        jobRunRepository.deleteAll(jobRunRepository.findByJobIdOrderByRunTimeDesc(id));
         jobRepository.deleteById(id);
     }
 

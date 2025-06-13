@@ -1,11 +1,10 @@
 #!/bin/bash
 # generate_description.sh - Create SEO friendly description via OpenAI
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
-if [ -f "$CONFIG_FILE" ]; then
-    # shellcheck disable=SC1090
-    source "$CONFIG_FILE"
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_OVERRIDE="${1:-}"
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
 if [ -z "$OUTPUT_VIDEO" ] || [ ! -f "$OUTPUT_VIDEO" ]; then
     echo "Video dosyası bulunamadı: $OUTPUT_VIDEO" >&2

@@ -1,11 +1,10 @@
 #!/bin/bash
 # generate_title.sh - Use OpenAI to create an SEO friendly title
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
-if [ -f "$CONFIG_FILE" ]; then
-    # shellcheck disable=SC1090
-    source "$CONFIG_FILE"
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_OVERRIDE="${1:-}"
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
 if [ -z "$VIDEO_FILE" ] || [ ! -f "$VIDEO_FILE" ]; then
     echo "Video dosyası bulunamadı: $VIDEO_FILE" >&2

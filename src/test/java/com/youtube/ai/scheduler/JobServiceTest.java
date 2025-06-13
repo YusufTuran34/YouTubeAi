@@ -43,8 +43,8 @@ class JobServiceTest {
         job.setName("test");
         job.setScriptPath(script.toString());
         job.setScriptParams("foo bar");
-        job.setCronExpression("0/1 * * * * *");
-        job.setActive(true);
+        job.setCronExpression("0 0 1 * * *");
+        job.setActive(false);
 
         jobService.save(job);
 
@@ -62,8 +62,8 @@ class JobServiceTest {
         job.setName("del");
         job.setScriptPath(script.toString());
         job.setScriptParams("baz");
-        job.setCronExpression("0/1 * * * * *");
-        job.setActive(true);
+        job.setCronExpression("0 0 1 * * *");
+        job.setActive(false);
 
         Job saved = jobService.save(job);
         assertFalse(jobService.listJobs().isEmpty());

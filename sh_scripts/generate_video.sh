@@ -6,13 +6,10 @@ rm -f /tmp/audio_list.txt /tmp/audio_list_ext.txt
 rm -rf /tmp/video_folder
 rm -f "$OUTPUT_VIDEO"
 
-CONFIG_FILE="${1:-$(dirname "$0")/config.conf}"
-if [ -f "$CONFIG_FILE" ]; then
-    source "$CONFIG_FILE"
-else
-    echo "Konfigürasyon dosyası bulunamadı: $CONFIG_FILE" >&2
-    exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_OVERRIDE="${1:-}"
+source "$SCRIPT_DIR/common.sh"
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
 TARGET_SECONDS=$(echo "$VIDEO_DURATION_HOURS * 3600" | bc)
 TARGET_SECONDS=${TARGET_SECONDS%.*}  # Virgülden sonrasını at
@@ -53,10 +50,10 @@ if [ -z "$VIDEO_FILE" ]; then
 fi
 
 # Müzikleri Jamendo üzerinden indir (eğer aktifse)
-if [ "${USE_JAMENDO:-0}" -eq 1 ] && [ -n "$CLIENT_ID" ]; then
+if [ "${USE_JAMENDO:-0}" -eq 1 ] && [ -n "$JAMENDO_CLIENT_ID" ]; then
     echo ">> Jamendo API'den müzik indiriliyor..."
     mkdir -p "$MUSIC_DIR"
-    response=$(curl -s "https://api.jamendo.com/v3.0/tracks/?client_id=$CLIENT_ID&format=json&tags=$TAG&limit=100&audioformat=mp31&license_cc=by")
+    response=$(curl -s "https://api.jamendo.com/v3.0/tracks/?client_id=$JAMENDO_CLIENT_ID&format=json&tags=$TAG&limit=100&audioformat=mp31&license_cc=by")
     if [ -z "$response" ]; then
         echo "HATA: Jamendo API yanıtı boş." >&2
         exit 1
