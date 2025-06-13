@@ -30,3 +30,17 @@ When scheduling jobs via the web UI you can also specify optional parameters tha
 will be passed to the script. For example a job with `scriptPath` set to
 `sh_scripts/run_video_and_stream.sh` and `scriptParams` of `12` will start a
 12 hour stream.
+
+## Twitter Posting
+Set your Twitter API credentials in `sh_scripts/config.conf`:
+```
+TWITTER_API_KEY="..."
+TWITTER_API_SECRET="..."
+TWITTER_ACCESS_TOKEN="..."
+TWITTER_ACCESS_SECRET="..."
+```
+After uploading a video or starting a stream you can notify followers with:
+```
+sh sh_scripts/post_to_twitter.sh "Check out my new video!"
+```
+If you want this to happen automatically, set `nextScript1` in your job configuration to `sh_scripts/post_to_twitter.sh` (see `src/main/resources/init.sql`).

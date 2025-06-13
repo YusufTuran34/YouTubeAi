@@ -11,4 +11,9 @@ fi
 
 bash "$SCRIPT_DIR/cleanup_outputs.sh" "$CONFIG_FILE"
 bash "$SCRIPT_DIR/run_generation_pipeline.sh" "$CONFIG_FILE"
-bash "$SCRIPT_DIR/upload_video.sh" "$CONFIG_FILE"
+UPLOAD_OUTPUT=$(bash "$SCRIPT_DIR/upload_video.sh" "$CONFIG_FILE")
+echo "$UPLOAD_OUTPUT"
+VIDEO_URL=$(echo "$UPLOAD_OUTPUT" | grep -o 'https://youtu.be/[A-Za-z0-9_-]*')
+if [ -n "$VIDEO_URL" ]; then
+    echo "$VIDEO_URL" > "$SCRIPT_DIR/latest_video_url.txt"
+fi
