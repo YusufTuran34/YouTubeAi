@@ -40,6 +40,7 @@ class JobControllerTest {
         Job job = new Job();
         job.setName("controller");
         job.setScriptPath(script.toString());
+        job.setScriptParams("p1");
         job.setCronExpression("* * * * *");
         job.setActive(false);
         return repository.save(job);

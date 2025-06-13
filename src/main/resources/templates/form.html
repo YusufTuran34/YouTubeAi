@@ -11,6 +11,7 @@
 <form action="/jobs" method="post" th:object="${job}">
     <input type="text" th:field="*{name}" placeholder="Görev Adı"/><br/>
     <input type="text" th:field="*{scriptPath}" placeholder="Ana SH Dosyası"/><br/>
+    <input type="text" th:field="*{scriptParams}" placeholder="Script Parametreleri"/><br/>
     <input type="text" th:field="*{cronExpression}" placeholder="Cron İfadesi (örn: 0 0 * * *)"/><br/>
     <input type="text" th:field="*{nextScript1}" placeholder="2. SH (isteğe bağlı)"/><br/>
     <input type="text" th:field="*{nextScript2}" placeholder="3. SH (isteğe bağlı)"/><br/>

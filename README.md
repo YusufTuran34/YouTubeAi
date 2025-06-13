@@ -25,3 +25,8 @@ Use helper scripts for common tasks:
 - `sh sh_scripts/run_generation_pipeline.sh` - generate video, description, thumbnail and title sequentially.
 - `sh sh_scripts/run_pipeline_and_upload.sh <hours>` - optional duration parameter then upload the result.
 - `sh sh_scripts/run_video_and_stream.sh <hours>` - generate a long video and start streaming.
+
+When scheduling jobs via the web UI you can also specify optional parameters that
+will be passed to the script. For example a job with `scriptPath` set to
+`sh_scripts/run_video_and_stream.sh` and `scriptParams` of `12` will start a
+12 hour stream.
