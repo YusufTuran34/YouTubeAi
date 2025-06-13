@@ -31,6 +31,21 @@ CHANNEL_CONFIGS='[
       "ACCESS_TOKEN": "",
       "ACCESS_SECRET": ""
     }
+  },
+  {
+    "name": "alt",
+    "youtube": {
+      "CLIENT_ID": "id2",
+      "CLIENT_SECRET": "secret2",
+      "REFRESH_TOKEN": "token2",
+      "STREAM_KEY": "stream2"
+    },
+    "twitter": {
+      "API_KEY": "",
+      "API_SECRET": "",
+      "ACCESS_TOKEN": "",
+      "ACCESS_SECRET": ""
+    }
   }
 ]'
 ```
@@ -55,7 +70,9 @@ will be passed to the script. For example a job with `scriptPath` set to
 12 hour stream and post to Twitter using the `lofi` tag.
 
 `src/main/resources/init.sql` includes sample jobs for daily streaming, uploading,
-and a standalone tweet job that calls `post_to_twitter.sh --tag lofi`.
+and a standalone tweet job that calls `post_to_twitter.sh --tag lofi`. Each job
+specifies a `channel` value so the correct credentials are loaded from
+`channels.env`.
 
 ## Twitter Posting
 Twitter credentials are read from the selected channel entry in `channels.env` or a channel specific config file:

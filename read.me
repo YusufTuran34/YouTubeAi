@@ -31,6 +31,21 @@ CHANNEL_CONFIGS='[
       "ACCESS_TOKEN": "",
       "ACCESS_SECRET": ""
     }
+  },
+  {
+    "name": "alt",
+    "youtube": {
+      "CLIENT_ID": "id2",
+      "CLIENT_SECRET": "secret2",
+      "REFRESH_TOKEN": "token2",
+      "STREAM_KEY": "stream2"
+    },
+    "twitter": {
+      "API_KEY": "",
+      "API_SECRET": "",
+      "ACCESS_TOKEN": "",
+      "ACCESS_SECRET": ""
+    }
   }
 ]'
 ```
@@ -54,7 +69,7 @@ will be passed to the script. For example a job with `scriptPath` set to
 `sh_scripts/run_video_and_stream.sh` and `scriptParams` of `12 --post-twitter --tag lofi` will start a
 12 hour stream and post to Twitter using the `lofi` tag.
 
-See `src/main/resources/init.sql` for sample jobs including a standalone tweet job that runs `post_to_twitter.sh --tag lofi`.
+See `src/main/resources/init.sql` for sample jobs including a standalone tweet job that runs `post_to_twitter.sh --tag lofi`. Each entry sets a `channel` so the scheduler loads the right credentials.
 
 Twitter credentials are loaded from the selected channel configuration. Run:
 ```bash

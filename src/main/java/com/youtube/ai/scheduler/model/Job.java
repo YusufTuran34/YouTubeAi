@@ -12,6 +12,7 @@ public class Job {
     private String name;
     private String scriptPath;
     private String scriptParams;
+    private String channel;
     private String cronExpression;
     private String nextScript1;
     private String nextScript2;
@@ -34,6 +35,9 @@ public class Job {
 
     public String getScriptParams() { return scriptParams; }
     public void setScriptParams(String scriptParams) { this.scriptParams = scriptParams; }
+
+    public String getChannel() { return channel; }
+    public void setChannel(String channel) { this.channel = channel; }
 
     public String getCronExpression() { return cronExpression; }
     public void setCronExpression(String cronExpression) { this.cronExpression = cronExpression; }

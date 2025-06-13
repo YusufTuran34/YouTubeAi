@@ -43,6 +43,7 @@ class JobServiceTest {
         job.setName("test");
         job.setScriptPath(script.toString());
         job.setScriptParams("foo bar");
+        job.setChannel("default");
         job.setCronExpression("0 0 1 * * *");
         job.setActive(false);
 
@@ -62,6 +63,7 @@ class JobServiceTest {
         job.setName("del");
         job.setScriptPath(script.toString());
         job.setScriptParams("baz");
+        job.setChannel("default");
         job.setCronExpression("0 0 1 * * *");
         job.setActive(false);
 

@@ -77,6 +77,9 @@ public class JobService {
                 command.addAll(Arrays.asList(params));
             }
             ProcessBuilder pb = new ProcessBuilder(command);
+            if (job.getChannel() != null) {
+                pb.environment().put("CHANNEL", job.getChannel());
+            }
             pb.redirectErrorStream(true);
             Process proc = pb.start();
             try (BufferedReader reader = new BufferedReader(
