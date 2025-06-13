@@ -17,6 +17,10 @@ public class Job {
     private String nextScript2;
     private boolean active;
 
+    @Column(length = 2000)
+    private String lastLog;
+    private Integer lastExitCode;
+
     // Getter / Setter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -41,4 +45,10 @@ public class Job {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public String getLastLog() { return lastLog; }
+    public void setLastLog(String lastLog) { this.lastLog = lastLog; }
+
+    public Integer getLastExitCode() { return lastExitCode; }
+    public void setLastExitCode(Integer lastExitCode) { this.lastExitCode = lastExitCode; }
 }

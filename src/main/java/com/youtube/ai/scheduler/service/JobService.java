@@ -57,6 +57,8 @@ public class JobService {
         if (job.getNextScript2() != null) scripts.add(job.getNextScript2());
 
         logger.info("Starting job '{}' with scripts {}", job.getName(), scripts);
+        StringBuilder logBuilder = new StringBuilder();
+        int exitCode = 0;
 
         for (String script : scripts) {
             logger.info("Running script {} for job {}", script, job.getName());
@@ -74,12 +76,22 @@ public class JobService {
                     new InputStreamReader(proc.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println("[JOB-" + job.getId() + "] " + line);
+                    String prefixed = "[JOB-" + job.getId() + "] " + line;
+                    System.out.println(prefixed);
+                    logBuilder.append(prefixed).append("\n");
                 }
             }
-            int exitCode = proc.waitFor();
+            exitCode = proc.waitFor();
             logger.info("Script {} completed for job {} with exit code {}", script, job.getName(), exitCode);
         }
+
+        job.setLastExitCode(exitCode);
+        String log = logBuilder.toString();
+        if (log.length() > 1000) {
+            log = log.substring(log.length() - 1000);
+        }
+        job.setLastLog(log);
+        jobRepository.save(job);
     }
 
     public void runNow(Long jobId) {

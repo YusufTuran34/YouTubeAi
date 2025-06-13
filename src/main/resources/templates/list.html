@@ -10,12 +10,14 @@
 <h2>Tanımlı Görevler</h2>
 <a href="/jobs/new">Yeni Görev</a>
 <table>
-<tr><th>Ad</th><th>Script</th><th>Param</th><th>Cron</th><th>İşlem</th></tr>
+<tr><th>Ad</th><th>Script</th><th>Param</th><th>Cron</th><th>Durum</th><th>Son Log</th><th>İşlem</th></tr>
 <tr th:each="job : ${jobs}">
     <td th:text="${job.name}">Ad</td>
     <td th:text="${job.scriptPath}">Script</td>
     <td th:text="${job.scriptParams}">Param</td>
     <td th:text="${job.cronExpression}">Cron</td>
+    <td th:text="${job.lastExitCode == null ? '-' : (job.lastExitCode == 0 ? 'Başarılı' : 'Hata')}">Durum</td>
+    <td th:text="${job.lastLog}">Log</td>
     <td>
         <a th:href="@{'/jobs/run/' + ${job.id}}">Çalıştır</a>
         <a th:href="@{'/jobs/delete/' + ${job.id}}">Sil</a>
