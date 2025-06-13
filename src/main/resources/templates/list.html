@@ -8,9 +8,9 @@
 </head>
 <body>
 <h2>Tanımlı Görevler</h2>
-<a href="/jobs/new">Yeni Görev</a>
+<a href="/jobs/new">Yeni Görev</a> | <a href="/jobs/schedule">Sıralamayı Düzenle</a>
 <table>
-<tr><th>Ad</th><th>Script</th><th>Param</th><th>Cron</th><th>Durum</th><th>Son Log</th><th>İşlem</th></tr>
+<tr><th>Ad</th><th>Script</th><th>Param</th><th>Cron</th><th>Durum</th><th>Son Log</th><th>İşlem</th><th>Loglar</th></tr>
 <tr th:each="job : ${jobs}">
     <td th:text="${job.name}">Ad</td>
     <td th:text="${job.scriptPath}">Script</td>
@@ -22,6 +22,7 @@
         <a th:href="@{'/jobs/run/' + ${job.id}}">Çalıştır</a>
         <a th:href="@{'/jobs/delete/' + ${job.id}}">Sil</a>
     </td>
+    <td><a th:href="@{'/jobs/logs/' + ${job.id}}">Görüntüle</a></td>
 </tr>
 </table>
 </body>

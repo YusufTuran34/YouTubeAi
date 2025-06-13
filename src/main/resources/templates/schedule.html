@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Schedule</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+    <style>
+    ul { list-style-type: none; padding: 0; }
+    li { margin: 5px; padding: 5px; background: #eee; cursor: move; }
+    </style>
+</head>
+<body>
+<h2>Görev Sıralaması</h2>
+<form action="/jobs/schedule" method="post" id="form">
+    <ul id="jobList">
+        <li th:each="job : ${jobs}" th:data-id="${job.id}" th:text="${job.name}"></li>
+    </ul>
+    <input type="hidden" name="order" id="order" />
+    <button type="submit">Kaydet</button>
+</form>
+<script>
+    const list = document.getElementById('jobList');
+    let drag;
+    list.addEventListener('dragstart', e => {
+        drag = e.target;
+    });
+    list.addEventListener('dragover', e => e.preventDefault());
+    list.addEventListener('drop', e => {
+        e.preventDefault();
+        if (e.target.tagName === 'LI' && drag !== e.target) {
+            list.insertBefore(drag, e.target.nextSibling);
+        }
+    });
+    document.getElementById('form').addEventListener('submit', () => {
+        const ids = Array.from(list.children).map(li => li.getAttribute('data-id'));
+        document.getElementById('order').value = ids.join(',');
+    });
+    Array.from(list.children).forEach(li => li.setAttribute('draggable','true'));
+</script>
+<a href="/jobs">Geri</a>
+</body>
+</html>
