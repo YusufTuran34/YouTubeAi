@@ -1,9 +1,10 @@
 #!/bin/bash
 # YouTube Video Yükleme Otomasyon Script'i
-
+escape_json() {
+  printf '%s' "$1" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read())[1:-1])'
+}
 set -e
 set -x
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_OVERRIDE="${1:-}"
 source "$SCRIPT_DIR/common.sh"
@@ -12,7 +13,7 @@ CONFIG_FILE="$CONFIG_OVERRIDE"
 
 LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
 [ -f "$LATEST_FILE" ] && OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
-
+echo "VIDEO LATEST_FILE :$LATEST_FILE "
 if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$REFRESH_TOKEN" ]; then
   echo "HATA: OAuth2 API bilgileri eksik."
   exit 1
@@ -35,6 +36,12 @@ if [[ "$VIDEO_PATH" != /* ]]; then
   fi
 fi
 
+
+if [ ! -f "$VIDEO_PATH" ]; then
+  echo "HATA: Video dosyası bulunamadı: $VIDEO_PATH"
+  exit 1
+fi
+
 if [[ "$THUMB_PATH" != /* ]]; then
   if [ -f "$THUMB_PATH" ]; then
     THUMB_PATH="$(realpath "$THUMB_PATH")"
@@ -43,14 +50,9 @@ if [[ "$THUMB_PATH" != /* ]]; then
   fi
 fi
 
-if [ ! -f "$VIDEO_PATH" ]; then
-  echo "HATA: Video dosyası bulunamadı: $VIDEO_PATH"
-  exit 1
-fi
-
 if [ -z "$VIDEO_DESCRIPTION" ]; then
   echo "⚠️  VIDEO_DESCRIPTION boş, otomatik oluşturuluyor..."
-  VIDEO_DESCRIPTION=$(sh "$SCRIPT_DIR/generate_description.sh" "$CONFIG_FILE")
+  VIDEO_DESCRIPTION=$(bash "$SCRIPT_DIR/generate_description.sh" "$CONFIG_FILE")
   if [ -z "$VIDEO_DESCRIPTION" ]; then
     echo "HATA: VIDEO_DESCRIPTION üretilemedi!"
     exit 1
@@ -58,9 +60,9 @@ if [ -z "$VIDEO_DESCRIPTION" ]; then
 fi
 
 # Thumbnail eksikse otomatik oluştur
-if [ -n "$THUMB_PATH" ] && [ ! -f "$THUMB_PATH" ]; then
-  echo "⚠️  Thumbnail dosyası bulunamadı, otomatik oluşturuluyor..."
-  sh "$SCRIPT_DIR/generate_thumbnail_from_video.sh" "$CONFIG_FILE"
+if [ -z "$THUMB_PATH" ] || [ ! -f "$THUMB_PATH" ]; then
+  echo "⚠️  Thumbnail eksik veya bulunamadı, otomatik oluşturuluyor..."
+  bash "$SCRIPT_DIR/generate_thumbnail_from_video.sh" "$CONFIG_FILE"
 
   if [ ! -f "$THUMB_PATH" ]; then
     echo "HATA: Thumbnail oluşturulamadı: $THUMB_PATH"
@@ -69,12 +71,11 @@ if [ -n "$THUMB_PATH" ] && [ ! -f "$THUMB_PATH" ]; then
 fi
 
 # VIDEO_TITLE eksikse otomatik oluştur
-if [ -n "$VIDEO_TITLE" ] && [ ! -f "$VIDEO_TITLE" ]; then
-  echo "⚠️  VIDEO_TITLE dosyası bulunamadı, otomatik oluşturuluyor..."
-  sh "$SCRIPT_DIR/generate_title.sh" "$CONFIG_FILE"
-
-  if [ ! -f "$VIDEO_TITLE" ]; then
-    echo "HATA: VIDEO_TITLE oluşturulamadı: $VIDEO_TITLE"
+if [ -z "$VIDEO_TITLE" ]; then
+  echo "⚠️  VIDEO_TITLE boş, otomatik oluşturuluyor..."
+  VIDEO_TITLE=$(bash "$SCRIPT_DIR/generate_title.sh" "$CONFIG_FILE")
+  if [ -z "$VIDEO_TITLE" ]; then
+    echo "HATA: VIDEO_TITLE oluşturulamadı!"
     exit 1
   fi
 fi
@@ -94,8 +95,8 @@ fi
 
 echo "Yükleme oturumu başlatılıyor..."
 API_URL="https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status"
-TITLE_ESCAPED=$(echo "$VIDEO_TITLE" | sed 's/"/\"/g')
-DESC_ESCAPED=$(echo "$VIDEO_DESCRIPTION" | sed 's/"/\"/g')
+TITLE_ESCAPED=$(escape_json "$VIDEO_TITLE")
+DESC_ESCAPED=$(escape_json "$VIDEO_DESCRIPTION")
 [ -z "$VIDEO_CATEGORY" ] && VIDEO_CATEGORY="22"
 [ -z "$VIDEO_PRIVACY" ] && VIDEO_PRIVACY="unlisted"
 JSON_DATA=$(cat <<EOF
@@ -111,7 +112,6 @@ JSON_DATA=$(cat <<EOF
 }
 EOF
 )
-
 
 TMP_HDR_FILE=$(mktemp)
 HTTP_CODE=$(curl -s -X POST "$API_URL" \
@@ -134,7 +134,7 @@ fi
 TMP_RES_FILE=$(mktemp)
 HTTP_CODE=$(curl -s -X PUT \
     -H "Authorization: Bearer $ACCESS_TOKEN" \
-    -H "Content-Type: video/*" \
+    -H "Content-Type: video/mp4" \
     --data-binary "@$VIDEO_PATH" \
     -o "$TMP_RES_FILE" -w "%{http_code}" \
     "$UPLOAD_URL")
@@ -151,10 +151,8 @@ if [ -z "$VIDEO_ID" ]; then
   echo "HATA: Video ID alınamadı!"
   exit 1
 fi
-echo "Video ID: $VIDEO_ID"
 
 if [ -n "$THUMB_PATH" ]; then
-  echo "Thumbnail yükleniyor: $THUMB_PATH ..."
   TMP_THUMB_RES=$(mktemp)
   THUMB_URL="https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId=${VIDEO_ID}&uploadType=media"
   HTTP_CODE=$(curl -s -X POST \
@@ -170,7 +168,6 @@ if [ -n "$THUMB_PATH" ]; then
     exit 1
   fi
   rm -f "$TMP_THUMB_RES"
-  echo "Thumbnail başarıyla yüklendi."
 fi
 
 echo "✅ Video yüklendi! YouTube Link: https://youtu.be/$VIDEO_ID"

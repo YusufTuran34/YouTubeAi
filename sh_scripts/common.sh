@@ -36,8 +36,17 @@ load_channel_config() {
       done < "$tmpfile"
 
       rm -f "$tmpfile"
+    else
+      echo "[HATA] '$channel' isimli kanal CHANNEL_CONFIGS içinde bulunamadı!" >&2
+      exit 1
     fi
+  else
+    echo "[HATA] jq bulunamadı veya CHANNEL_CONFIGS boş!" >&2
+    exit 1
   fi
 
-  [ -n "$override" ] && [ -f "$override" ] && . "$override"
+  if [ -n "$override" ] && [ -f "$override" ]; then
+    echo "[DEBUG] Override config yükleniyor: $override"
+    . "$override"
+  fi
 }
