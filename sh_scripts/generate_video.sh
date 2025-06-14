@@ -18,15 +18,16 @@ mkdir -p "$MUSIC_DIR"
 
 # Arkaplan videosunu belirle
 VIDEO_FILE=""
-if [ "${USE_GOOGLE_DRIVE:-0}" -eq 1 ] && [ -n "$DRIVE_FOLDER_ID" ]; then
-    echo ">> Google Drive klasöründen video indiriliyor..."
-    VIDEO_TEMP_DIR="/tmp/video_folder"
-    mkdir -p "$VIDEO_TEMP_DIR"
-    gdown --folder "https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}" -O "$VIDEO_TEMP_DIR"
-    SELECTED_VIDEO=$(find "$VIDEO_TEMP_DIR" -type f -iname '*.mp4' | shuf -n 1)
-    if [ -n "$SELECTED_VIDEO" ]; then
-        VIDEO_FILE="$SELECTED_VIDEO"
-        echo ">> Seçilen video: $VIDEO_FILE"
+
+# OpenAI ile GIF üretme seçeneği
+if [ "${USE_OPENAI_GIF:-0}" -eq 1 ]; then
+    echo ">> OpenAI ile arkaplan GIF'i üretiliyor..."
+    VIDEO_FILE="$("$SCRIPT_DIR/generate_gif_with_openai.sh" "$CONFIG_OVERRIDE")"
+    if [ -n "$VIDEO_FILE" ] && [ -f "$VIDEO_FILE" ]; then
+        echo ">> Üretilen GIF: $VIDEO_FILE"
+    else
+        echo "HATA: OpenAI GIF üretimi başarısız oldu." >&2
+        VIDEO_FILE=""
     fi
 fi
 
@@ -45,7 +46,7 @@ if [ -z "$VIDEO_FILE" ]; then
 fi
 
 if [ -z "$VIDEO_FILE" ]; then
-    echo "HATA: Arkaplan videosu için kaynak bulunamadı. Google Drive, BACKGROUND_VIDEO veya VIDEO_SOURCE_DIR tanımlı olmalı." >&2
+    echo "HATA: Arkaplan videosu için kaynak bulunamadı. BACKGROUND_VIDEO, VIDEO_SOURCE_DIR veya USE_OPENAI_GIF tanımlı olmalı." >&2
     exit 1
 fi
 
