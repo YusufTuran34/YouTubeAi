@@ -38,8 +38,8 @@ fi
 
 # Validate credentials
 if [ -z "$TWITTER_API_KEY" ] || [ -z "$TWITTER_API_SECRET" ] || [ -z "$TWITTER_ACCESS_TOKEN" ] || [ -z "$TWITTER_ACCESS_SECRET" ]; then
-    echo "Twitter API credentials are missing in channels.env" >&2
-    exit 1
+    echo "Twitter API credentials are missing, skipping tweet" >&2
+    exit 0
 fi
 
 # Default message if none provided

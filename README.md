@@ -82,6 +82,7 @@ TWITTER_API_SECRET="..."
 TWITTER_ACCESS_TOKEN="..."
 TWITTER_ACCESS_SECRET="..."
 ```
+If these variables are empty the `post_to_twitter.sh` script logs a message and exits without posting.
 After uploading a video or starting a stream you can notify followers with:
 ```
 sh sh_scripts/post_to_twitter.sh
