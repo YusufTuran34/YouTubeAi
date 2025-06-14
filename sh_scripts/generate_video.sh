@@ -31,6 +31,24 @@ if [ "${USE_OPENAI_GIF:-0}" -eq 1 ]; then
     fi
 fi
 
+# OpenAI başarısız olduysa Google Drive'dan dosya indir
+if [ -z "$VIDEO_FILE" ] && [ "${USE_GOOGLE_DRIVE:-0}" -eq 1 ] && [ -n "$DRIVE_FOLDER_ID" ]; then
+    if command -v gdown >/dev/null 2>&1; then
+        echo ">> Google Drive'dan arkaplan dosyası indiriliyor..."
+        TMP_DRIVE_DIR=$(mktemp -d)
+        gdown --quiet --folder "https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}" -O "$TMP_DRIVE_DIR" --remaining-ok
+        DRIVE_FILE=$(find "$TMP_DRIVE_DIR" -type f \( -iname '*.mp4' -o -iname '*.gif' \) | shuf -n 1)
+        if [ -n "$DRIVE_FILE" ]; then
+            VIDEO_FILE="$DRIVE_FILE"
+            echo ">> İndirilen dosya: $VIDEO_FILE"
+        else
+            echo "HATA: Google Drive klasöründe uygun dosya bulunamadı." >&2
+        fi
+    else
+        echo "HATA: gdown aracı yüklü değil, Google Drive kullanılamıyor." >&2
+    fi
+fi
+
 if [ -z "$VIDEO_FILE" ]; then
     if [ -n "$BACKGROUND_VIDEO" ] && [ -f "$BACKGROUND_VIDEO" ]; then
         VIDEO_FILE="$BACKGROUND_VIDEO"

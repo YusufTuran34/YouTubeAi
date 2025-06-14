@@ -13,6 +13,8 @@ KEYWORDS="lofi, study music"
 USE_OPENAI_GIF=0              # Set to 1 to create a GIF with OpenAI
 AI_GIF_PROMPT="lofi city at night animation"
 AI_GIF_MODEL="dall-e-2"      # or dall-e-3 for higher quality
+USE_GOOGLE_DRIVE=1           # Fallback if OpenAI GIF generation fails
+DRIVE_FOLDER_ID="1SevV-LKA67CVmEimWUwWicdJ0Eud6nHm"
 ```
 
 Per-channel credentials are kept in `sh_scripts/channels.env` as a JSON array.
