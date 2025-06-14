@@ -22,8 +22,24 @@ fi
 
 VIDEO_PATH="$OUTPUT_VIDEO"
 THUMB_PATH="$THUMBNAIL_FILE"
-[[ "$VIDEO_PATH" != /* ]] && VIDEO_PATH="$SCRIPT_DIR/$VIDEO_PATH"
-[[ "$THUMB_PATH" != /* ]] && THUMB_PATH="$SCRIPT_DIR/$THUMB_PATH"
+
+# If relative, try current working directory first, then fall back to script dir
+if [[ "$VIDEO_PATH" != /* ]]; then
+  if [ -f "$VIDEO_PATH" ]; then
+    VIDEO_PATH="$(realpath "$VIDEO_PATH")"
+  else
+    VIDEO_PATH="$SCRIPT_DIR/$VIDEO_PATH"
+  fi
+fi
+
+if [[ "$THUMB_PATH" != /* ]]; then
+  if [ -f "$THUMB_PATH" ]; then
+    THUMB_PATH="$(realpath "$THUMB_PATH")"
+  else
+    THUMB_PATH="$SCRIPT_DIR/$THUMB_PATH"
+  fi
+fi
+
 if [ ! -f "$VIDEO_PATH" ]; then
   echo "HATA: Video dosyası bulunamadı: $VIDEO_PATH"
   exit 1
