@@ -63,16 +63,21 @@ if [ -z "$MESSAGE" ]; then
     fi
 fi
 
+# Virtual environment setup
+VENV_PATH="$SCRIPT_DIR/.venv"
+if [ ! -d "$VENV_PATH" ]; then
+    python3 -m venv "$VENV_PATH"
+    source "$VENV_PATH/bin/activate"
+    pip install --quiet tweepy
+else
+    source "$VENV_PATH/bin/activate"
+fi
+
 export TWITTER_API_KEY TWITTER_API_SECRET TWITTER_ACCESS_TOKEN TWITTER_ACCESS_SECRET TWEET_MESSAGE="$MESSAGE"
 
 python3 - <<'PY'
 import os
-try:
-    import tweepy
-except ImportError:
-    import subprocess, sys
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--quiet', 'tweepy'])
-    import tweepy
+import tweepy
 
 api_key = os.environ['TWITTER_API_KEY']
 api_secret = os.environ['TWITTER_API_SECRET']
