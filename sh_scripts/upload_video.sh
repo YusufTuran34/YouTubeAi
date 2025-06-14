@@ -10,6 +10,9 @@ source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 CONFIG_FILE="$CONFIG_OVERRIDE"
 
+LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
+[ -f "$LATEST_FILE" ] && OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
+
 if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$REFRESH_TOKEN" ]; then
   echo "HATA: OAuth2 API bilgileri eksik."
   exit 1

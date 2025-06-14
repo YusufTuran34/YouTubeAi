@@ -6,8 +6,7 @@ CONFIG_OVERRIDE="${1:-}"
 source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
-# Remove generated video if exists
-[ -n "$OUTPUT_VIDEO" ] && rm -f "$OUTPUT_VIDEO"
+# Generated videoları saklamak için artık silmiyoruz
 
 # Remove mp3 files in MUSIC_DIR if set
 if [ -n "$MUSIC_DIR" ] && [ -d "$MUSIC_DIR" ]; then
