@@ -15,7 +15,7 @@ if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$REFRESH_TOKEN" ]; th
   exit 1
 fi
 
-if [ -z "$OUTPUT_VIDEO" ] then
+if [ -z "$OUTPUT_VIDEO" ]; then
   echo "HATA: Video bilgileri eksik."
   exit 1
 fi
