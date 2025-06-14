@@ -23,7 +23,7 @@ load_channel_config() {
         local json
         json=$(echo "$CHANNEL_CONFIGS" | jq -c --arg name "$channel" '.[] | select(.name==$name)')
         if [ -n "$json" ]; then
-            echo "$json" | jq -r 'paths(scalars) as $p | [($p|join(".")), (getpath($p))] | @tsv' | while IFS=$'\t' read -r path value; do
+            while IFS=$'\t' read -r path value; do
                 case "$path" in
                     youtube.CLIENT_ID) export CLIENT_ID="$value" ;;
                     youtube.CLIENT_SECRET) export CLIENT_SECRET="$value" ;;
@@ -35,7 +35,7 @@ load_channel_config() {
                     twitter.ACCESS_SECRET) export TWITTER_ACCESS_SECRET="$value" ;;
                     *) key=$(echo "$path" | tr '.-' '_'); export "$key"="$value" ;;
                 esac
-            done
+            done < <(echo "$json" | jq -r 'paths(scalars) as $p | [($p|join(".")), (getpath($p))] | @tsv')
         fi
     fi
 
