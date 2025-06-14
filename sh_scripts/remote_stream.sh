@@ -6,6 +6,9 @@ CONFIG_OVERRIDE="${1:-}"
 source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
+LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
+[ -f "$LATEST_FILE" ] && OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
+
 RTMP_URL="${YOUTUBE_STREAM_URL}/${YOUTUBE_STREAM_KEY}"
 
 echo ">> Önceki ffmpeg süreçleri kontrol ediliyor..."

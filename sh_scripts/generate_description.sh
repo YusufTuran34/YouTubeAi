@@ -6,6 +6,9 @@ CONFIG_OVERRIDE="${1:-}"
 source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
+LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
+[ -f "$LATEST_FILE" ] && OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
+
 if [ -z "$OUTPUT_VIDEO" ] || [ ! -f "$OUTPUT_VIDEO" ]; then
     echo "Video dosyası bulunamadı: $OUTPUT_VIDEO" >&2
     exit 1

@@ -4,12 +4,25 @@
 echo ">> Önceki geçici dosyalar temizleniyor..."
 rm -f /tmp/audio_list.txt /tmp/audio_list_ext.txt
 rm -rf /tmp/video_folder
-rm -f "$OUTPUT_VIDEO"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_OVERRIDE="${1:-}"
 source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
+
+LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
+if [ -f "$LATEST_FILE" ]; then
+  OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
+else
+  DIR="$(dirname "$OUTPUT_VIDEO")"
+  BASE="$(basename "$OUTPUT_VIDEO")"
+  EXT="${BASE##*.}"
+  NAME="${BASE%.*}"
+  TIMESTAMP=$(date +'%Y%m%d_%H%M')
+  OUTPUT_VIDEO="$DIR/${NAME}_${TIMESTAMP}.${EXT}"
+  echo "$OUTPUT_VIDEO" > "$LATEST_FILE"
+fi
+export OUTPUT_VIDEO
 
 TARGET_SECONDS=$(echo "$VIDEO_DURATION_HOURS * 3600" | bc)
 TARGET_SECONDS=${TARGET_SECONDS%.*}  # Virgülden sonrasını at
