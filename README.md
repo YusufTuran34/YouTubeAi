@@ -12,6 +12,7 @@ OPENAI_MODEL="gpt-3.5-turbo"  # Optional
 KEYWORDS="lofi, study music"
 USE_OPENAI_GIF=0              # Set to 1 to create a GIF with OpenAI
 AI_GIF_PROMPT="lofi city at night animation"
+AI_GIF_MODEL="dall-e-2"      # or dall-e-3 for higher quality
 ```
 
 Per-channel credentials are kept in `sh_scripts/channels.env` as a JSON array.
@@ -66,6 +67,7 @@ Use helper scripts for common tasks:
 - `sh sh_scripts/run_pipeline_and_upload.sh <hours> [options]` - run the pipeline and optionally upload and tweet.
 - `sh sh_scripts/run_pipeline_and_stream.sh <hours> [options]` - run the pipeline then stream the result and optionally tweet.
 - `sh sh_scripts/generate_gif_with_openai.sh` - create a background GIF with OpenAI (requires API key).
+  Use `AI_GIF_MODEL` to choose between `dall-e-2` (supports 512x512) and `dall-e-3` (only 1024 sizes).
 
 
 When scheduling jobs via the web UI you can also specify optional parameters that
