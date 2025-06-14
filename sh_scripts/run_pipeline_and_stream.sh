@@ -1,5 +1,5 @@
 #!/bin/bash
-# run_video_and_stream.sh - set duration then generate video and stream
+# run_pipeline_and_stream.sh - set duration then run generation pipeline and stream
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -10,7 +10,6 @@ source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}"
 POST_TWITTER=0
 TAG=""
-
 # Parse args
 if [[ "$1" =~ ^[0-9] ]]; then
     DURATION_HOURS="$1"
@@ -33,8 +32,7 @@ done
 bash "$SCRIPT_DIR/update_config.sh" VIDEO_DURATION_HOURS "$DURATION_HOURS" "$CONFIG_OVERRIDE"
 [ -n "$TAG" ] && bash "$SCRIPT_DIR/update_config.sh" TAG "$TAG" "$CONFIG_OVERRIDE"
 
-bash "$SCRIPT_DIR/cleanup_outputs.sh" "$CONFIG_OVERRIDE"
-bash "$SCRIPT_DIR/generate_video.sh" "$CONFIG_OVERRIDE"
+bash "$SCRIPT_DIR/run_generation_pipeline.sh" "$CONFIG_OVERRIDE"
 bash "$SCRIPT_DIR/upload_and_stream.sh" "$CONFIG_OVERRIDE"
 
 if [ "$POST_TWITTER" -eq 1 ]; then

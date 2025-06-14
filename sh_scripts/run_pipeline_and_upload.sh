@@ -43,7 +43,6 @@ done
 [ -n "$TAG" ] && bash "$SCRIPT_DIR/update_config.sh" TAG "$TAG" "$CONFIG_OVERRIDE"
 
 if [ "$RUN_GENERATION" -eq 1 ]; then
-    bash "$SCRIPT_DIR/cleanup_outputs.sh" "$CONFIG_OVERRIDE"
     bash "$SCRIPT_DIR/run_generation_pipeline.sh" "$CONFIG_OVERRIDE"
 fi
 
