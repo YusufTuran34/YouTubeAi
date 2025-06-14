@@ -6,9 +6,9 @@ This project includes shell scripts for generating and uploading YouTube videos 
 Shared settings live in `sh_scripts/configs/base.conf`. Example keys:
 
 ```bash
-VIDEO_FILE="sample.mp4"        # Input video
-OPENAI_API_KEY="sk-..."        # Your OpenAI token
-OPENAI_MODEL="gpt-3.5-turbo"   # Optional
+OUTPUT_VIDEO="./output.mp4"   # Generated file path
+OPENAI_API_KEY="sk-..."       # Your OpenAI token
+OPENAI_MODEL="gpt-3.5-turbo"  # Optional
 KEYWORDS="lofi, study music"
 ```
 

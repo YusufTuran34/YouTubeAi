@@ -6,12 +6,13 @@ CONFIG_OVERRIDE="${1:-}"
 source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
-if [ -z "$VIDEO_FILE" ] || [ ! -f "$VIDEO_FILE" ]; then
-    echo "Video dosyası bulunamadı: $VIDEO_FILE" >&2
+DURATION_SOURCE="${OUTPUT_VIDEO:-$VIDEO_FILE}"
+if [ -z "$DURATION_SOURCE" ] || [ ! -f "$DURATION_SOURCE" ]; then
+    echo "Video dosyası bulunamadı: $DURATION_SOURCE" >&2
     exit 1
 fi
 
-DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$VIDEO_FILE")
+DURATION=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$DURATION_SOURCE")
 DURATION_INT=${DURATION%.*}
 
 TITLE=""
