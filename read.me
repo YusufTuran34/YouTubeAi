@@ -71,7 +71,7 @@ will be passed to the script. For example a job with `scriptPath` set to
 
 See `src/main/resources/init.sql` for sample jobs including a standalone tweet job that runs `post_to_twitter.sh --tag lofi`. Each entry sets a `channel` so the scheduler loads the right credentials.
 
-Twitter credentials are loaded from the selected channel configuration. Run:
+Twitter credentials are loaded from the selected channel configuration. If they are missing the Twitter posting script just logs a message and exits. Run:
 ```bash
 sh sh_scripts/post_to_twitter.sh --tag lofi
 ```
