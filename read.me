@@ -53,16 +53,16 @@ Source this file and set `CHANNEL` before running scripts:
 You can override its path with the `CHANNEL_ENV_FILE` variable.
 
 ```bash
-sh sh_scripts/generate_title.sh
-sh sh_scripts/generate_description.sh
+bash sh_scripts/generate_title.sh
+bash sh_scripts/generate_description.sh
 ```
 
 If `OPENAI_API_KEY` is not set or the API call fails, the scripts fall back to basic templates.
 Use helper scripts for common tasks:
 
-- `sh sh_scripts/run_generation_pipeline.sh` - generate video, description, thumbnail and title sequentially.
-- `sh sh_scripts/run_pipeline_and_upload.sh <hours> [options]` - run the pipeline and optionally upload and tweet.
-- `sh sh_scripts/run_pipeline_and_stream.sh <hours> [options]` - run the pipeline then stream the result and optionally tweet.
+- `bash sh_scripts/run_generation_pipeline.sh` - generate video, description, thumbnail and title sequentially.
+- `bash sh_scripts/run_pipeline_and_upload.sh <hours> [options]` - run the pipeline and optionally upload and tweet.
+- `bash sh_scripts/run_pipeline_and_stream.sh <hours> [options]` - run the pipeline then stream the result and optionally tweet.
 
 When scheduling jobs via the web UI you can also specify optional parameters that
 will be passed to the script. For example a job with `scriptPath` set to
@@ -73,6 +73,6 @@ See `src/main/resources/init.sql` for sample jobs including a standalone tweet j
 
 Twitter credentials are loaded from the selected channel configuration. If they are missing the Twitter posting script just logs a message and exits. Run:
 ```bash
-sh sh_scripts/post_to_twitter.sh --tag lofi
+bash sh_scripts/post_to_twitter.sh --tag lofi
 ```
 The text is generated with ChatGPT unless you pass `--message` yourself.

@@ -47,7 +47,7 @@ fi
 
 if [ -z "$VIDEO_DESCRIPTION" ]; then
   echo "⚠️  VIDEO_DESCRIPTION boş, otomatik oluşturuluyor..."
-  VIDEO_DESCRIPTION=$(sh "$SCRIPT_DIR/generate_description.sh" "$CONFIG_FILE")
+  VIDEO_DESCRIPTION=$(bash "$SCRIPT_DIR/generate_description.sh" "$CONFIG_FILE")
   if [ -z "$VIDEO_DESCRIPTION" ]; then
     echo "HATA: VIDEO_DESCRIPTION üretilemedi!"
     exit 1
@@ -57,7 +57,7 @@ fi
 # Thumbnail eksikse otomatik oluştur
 if [ -n "$THUMB_PATH" ] && [ ! -f "$THUMB_PATH" ]; then
   echo "⚠️  Thumbnail dosyası bulunamadı, otomatik oluşturuluyor..."
-  sh "$SCRIPT_DIR/generate_thumbnail_from_video.sh" "$CONFIG_FILE"
+  bash "$SCRIPT_DIR/generate_thumbnail_from_video.sh" "$CONFIG_FILE"
 
   if [ ! -f "$THUMB_PATH" ]; then
     echo "HATA: Thumbnail oluşturulamadı: $THUMB_PATH"
@@ -68,7 +68,7 @@ fi
 # VIDEO_TITLE eksikse otomatik oluştur
 if [ -n "$VIDEO_TITLE" ] && [ ! -f "$VIDEO_TITLE" ]; then
   echo "⚠️  VIDEO_TITLE dosyası bulunamadı, otomatik oluşturuluyor..."
-  sh "$SCRIPT_DIR/generate_title.sh" "$CONFIG_FILE"
+  bash "$SCRIPT_DIR/generate_title.sh" "$CONFIG_FILE"
 
   if [ ! -f "$VIDEO_TITLE" ]; then
     echo "HATA: VIDEO_TITLE oluşturulamadı: $VIDEO_TITLE"
