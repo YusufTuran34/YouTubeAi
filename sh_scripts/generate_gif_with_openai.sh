@@ -11,6 +11,7 @@ FRAME_COUNT="${AI_GIF_FRAMES:-4}"
 GIF_OUTPUT="${AI_GIF_OUTPUT:-background.gif}"
 WIDTH="${AI_GIF_WIDTH:-512}"
 HEIGHT="${AI_GIF_HEIGHT:-512}"
+MODEL="${AI_GIF_MODEL:-dall-e-2}"
 
 if [ -z "$OPENAI_API_KEY" ]; then
     echo "OPENAI_API_KEY is required for GIF generation" >&2
@@ -24,7 +25,7 @@ for i in $(seq 1 "$FRAME_COUNT"); do
     response=$(curl -s https://api.openai.com/v1/images/generations \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $OPENAI_API_KEY" \
-        -d "{\"model\":\"dall-e-3\",\"prompt\":\"$FRAME_PROMPT\",\"n\":1,\"size\":\"${WIDTH}x${HEIGHT}\"}")
+        -d "{\"model\":\"$MODEL\",\"prompt\":\"$FRAME_PROMPT\",\"n\":1,\"size\":\"${WIDTH}x${HEIGHT}\"}")
     url=$(echo "$response" | jq -r '.data[0].url')
     if [ -z "$url" ] || [ "$url" = "null" ]; then
         echo "Failed to generate frame $i" >&2
