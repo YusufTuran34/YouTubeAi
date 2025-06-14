@@ -1,46 +1,43 @@
-#!/bin/bash
-# common.sh - utilities for multi-channel configuration
+#!/bin/sh
+# common.sh - multi-channel config loader (POSIX uyumlu)
 
 load_channel_config() {
-    local channel="${1:-default}"
-    local override="$2"
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local cfg_dir="$script_dir/configs"
-    local base_conf="$cfg_dir/base.conf"
-    local env_file="${CHANNEL_ENV_FILE:-$script_dir/channels.env}"
+  channel="${1:-default}"
+  override="$2"
+  script_dir="$(cd "$(dirname "$0")" && pwd)"
+  cfg_dir="$script_dir/configs"
+  base_conf="$cfg_dir/base.conf"
+  env_file="${CHANNEL_ENV_FILE:-$script_dir/channels.env}"
 
-    if [ -f "$base_conf" ]; then
-        # shellcheck disable=SC1090
-        source "$base_conf"
-    fi
+  [ -f "$base_conf" ] && . "$base_conf"
+  [ -f "$env_file" ] && . "$env_file"
 
-    if [ -f "$env_file" ]; then
-        # shellcheck disable=SC1090
-        source "$env_file"
-    fi
+  if [ -n "$CHANNEL_CONFIGS" ] && command -v jq >/dev/null 2>&1; then
+    json=$(echo "$CHANNEL_CONFIGS" | jq -c --arg name "$channel" '.[] | select(.name==$name)')
+    if [ -n "$json" ]; then
+      tmpfile=$(mktemp) || exit 1
+      echo "$json" | jq -r 'paths(scalars) as $p |
+        [($p|join(".")), (getpath($p))] | @tsv' > "$tmpfile"
 
-    if [ -n "$CHANNEL_CONFIGS" ] && command -v jq >/dev/null 2>&1; then
-        local json
-        json=$(echo "$CHANNEL_CONFIGS" | jq -c --arg name "$channel" '.[] | select(.name==$name)')
-        if [ -n "$json" ]; then
-            while IFS=$'\t' read -r path value; do
-                case "$path" in
-                    youtube.CLIENT_ID) export CLIENT_ID="$value" ;;
-                    youtube.CLIENT_SECRET) export CLIENT_SECRET="$value" ;;
-                    youtube.REFRESH_TOKEN) export REFRESH_TOKEN="$value" ;;
-                    youtube.STREAM_KEY) export YOUTUBE_STREAM_KEY="$value" ;;
-                    twitter.API_KEY) export TWITTER_API_KEY="$value" ;;
-                    twitter.API_SECRET) export TWITTER_API_SECRET="$value" ;;
-                    twitter.ACCESS_TOKEN) export TWITTER_ACCESS_TOKEN="$value" ;;
-                    twitter.ACCESS_SECRET) export TWITTER_ACCESS_SECRET="$value" ;;
-                    *) key=$(echo "$path" | tr '.-' '_'); export "$key"="$value" ;;
-                esac
-            done < <(echo "$json" | jq -r 'paths(scalars) as $p | [($p|join(".")), (getpath($p))] | @tsv')
-        fi
-    fi
+      while IFS="$(printf '\t')" read -r path value; do
+        case "$path" in
+          youtube.CLIENT_ID) CLIENT_ID="$value" ;;
+          youtube.CLIENT_SECRET) CLIENT_SECRET="$value" ;;
+          youtube.REFRESH_TOKEN) REFRESH_TOKEN="$value" ;;
+          youtube.STREAM_KEY) YOUTUBE_STREAM_KEY="$value" ;;
+          twitter.API_KEY) TWITTER_API_KEY="$value" ;;
+          twitter.API_SECRET) TWITTER_API_SECRET="$value" ;;
+          twitter.ACCESS_TOKEN) TWITTER_ACCESS_TOKEN="$value" ;;
+          twitter.ACCESS_SECRET) TWITTER_ACCESS_SECRET="$value" ;;
+          *)
+            key=$(echo "$path" | tr '.-' '_')
+            eval "export $key=\"\$value\"" ;;
+        esac
+      done < "$tmpfile"
 
-    if [ -n "$override" ] && [ -f "$override" ]; then
-        # shellcheck disable=SC1090
-        source "$override"
+      rm -f "$tmpfile"
     fi
+  fi
+
+  [ -n "$override" ] && [ -f "$override" ] && . "$override"
 }

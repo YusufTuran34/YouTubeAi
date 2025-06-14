@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # generate_description.sh - Create SEO friendly description via OpenAI
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
