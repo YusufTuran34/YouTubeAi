@@ -6,12 +6,15 @@ public class ScheduleEntry {
     private String jobName;
     private String channel;
     private LocalDateTime time;
+    // If true, this entry represents a video duration rather than live stream time
+    private boolean video;
 
     public ScheduleEntry() {}
-    public ScheduleEntry(String jobName, String channel, LocalDateTime time) {
+    public ScheduleEntry(String jobName, String channel, LocalDateTime time, boolean video) {
         this.jobName = jobName;
         this.channel = channel;
         this.time = time;
+        this.video = video;
     }
 
     public String getJobName() { return jobName; }
@@ -22,4 +25,7 @@ public class ScheduleEntry {
 
     public LocalDateTime getTime() { return time; }
     public void setTime(LocalDateTime time) { this.time = time; }
+
+    public boolean isVideo() { return video; }
+    public void setVideo(boolean video) { this.video = video; }
 }

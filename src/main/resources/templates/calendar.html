@@ -30,7 +30,11 @@
     <tr th:each="hour : ${#numbers.sequence(0,23)}">
         <td th:text="${hour} + ':00'"></td>
         <td th:each="day : ${#numbers.sequence(1,7)}">
-            <div th:each="e : ${entries}" th:if="${e.time.dayOfWeek.value} == ${day} and ${e.time.hour} == ${hour}" th:text="${e.jobName}" th:style="'color:' + ${channelColors[e.channel]}" class="entry"></div>
+            <div th:each="e : ${entries}"
+                 th:if="${e.time.dayOfWeek.value} == ${day} and ${e.time.hour} == ${hour}"
+                 th:text="${e.jobName}"
+                 th:style="'color:' + ${channelColors[e.channel]} + ';opacity:' + (${e.video} ? '0.4' : '1')"
+                 class="entry"></div>
         </td>
     </tr>
     </tbody>
