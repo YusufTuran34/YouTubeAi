@@ -33,6 +33,8 @@ load_channel_config() {
           twitter.CLIENT_SECRET) TWITTER_CLIENT_SECRET="$value" ;;
           twitter.TWITTER_AUTH_CODE) TWITTER_AUTH_CODE="$value" ;;
           twitter.TWITTER_CODE_VERIFIER) TWITTER_CODE_VERIFIER="$value" ;;
+          instagram.USERNAME) INSTAGRAM_USERNAME="$value" ;;
+          instagram.PASSWORD) INSTAGRAM_PASSWORD="$value" ;;
           *)
             key=$(echo "$path" | tr '.-' '_')
             eval "export $key=\"\$value\"" ;;

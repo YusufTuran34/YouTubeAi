@@ -12,6 +12,7 @@ CONFIG_FILE=""  # path passed to other scripts if override specified
 RUN_GENERATION=1
 RUN_UPLOAD=1
 POST_TWITTER=0
+POST_INSTAGRAM=0
 TAG=""
 
 # Parse arguments
@@ -30,6 +31,8 @@ while [ $# -gt 0 ]; do
             RUN_UPLOAD=0; shift;;
         --post-twitter)
             POST_TWITTER=1; shift;;
+        --post-instagram)
+            POST_INSTAGRAM=1; shift;;
         --tag)
             TAG="$2"; shift 2;;
         *)
@@ -57,4 +60,8 @@ fi
 
 if [ "$POST_TWITTER" -eq 1 ]; then
     bash "$SCRIPT_DIR/post_to_twitter.sh" "$CONFIG_OVERRIDE"
+fi
+
+if [ "$POST_INSTAGRAM" -eq 1 ]; then
+    bash "$SCRIPT_DIR/post_instagram_story.sh" "$CONFIG_OVERRIDE"
 fi

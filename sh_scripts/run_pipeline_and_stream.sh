@@ -9,6 +9,7 @@ CONFIG_OVERRIDE=""
 source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}"
 POST_TWITTER=0
+POST_INSTAGRAM=0
 TAG=""
 # Parse args
 if [[ "$1" =~ ^[0-9] ]]; then
@@ -22,6 +23,8 @@ while [ $# -gt 0 ]; do
             CONFIG_OVERRIDE="$2"; shift 2;;
         --post-twitter)
             POST_TWITTER=1; shift;;
+        --post-instagram)
+            POST_INSTAGRAM=1; shift;;
         --tag)
             TAG="$2"; shift 2;;
         *)
@@ -37,4 +40,8 @@ bash "$SCRIPT_DIR/upload_and_stream.sh" "$CONFIG_OVERRIDE"
 
 if [ "$POST_TWITTER" -eq 1 ]; then
     bash "$SCRIPT_DIR/post_to_twitter.sh" "$CONFIG_OVERRIDE"
+fi
+
+if [ "$POST_INSTAGRAM" -eq 1 ]; then
+    bash "$SCRIPT_DIR/post_instagram_story.sh" "$CONFIG_OVERRIDE"
 fi
