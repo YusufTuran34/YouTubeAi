@@ -29,6 +29,10 @@ load_channel_config() {
           twitter.API_SECRET) TWITTER_API_SECRET="$value" ;;
           twitter.ACCESS_TOKEN) TWITTER_ACCESS_TOKEN="$value" ;;
           twitter.ACCESS_SECRET) TWITTER_ACCESS_SECRET="$value" ;;
+          twitter.CLIENT_ID) TWITTER_CLIENT_ID="$value" ;;
+          twitter.CLIENT_SECRET) TWITTER_CLIENT_SECRET="$value" ;;
+          twitter.TWITTER_AUTH_CODE) TWITTER_AUTH_CODE="$value" ;;
+          twitter.TWITTER_CODE_VERIFIER) TWITTER_CODE_VERIFIER="$value" ;;
           *)
             key=$(echo "$path" | tr '.-' '_')
             eval "export $key=\"\$value\"" ;;

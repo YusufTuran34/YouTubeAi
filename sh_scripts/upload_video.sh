@@ -80,7 +80,6 @@ if [ -z "$VIDEO_TITLE" ]; then
   fi
 fi
 
-echo "OAuth2 token alınıyor..."
 ACCESS_TOKEN=$(curl -s -H "Content-Type: application/x-www-form-urlencoded" \
     -d "client_id=$CLIENT_ID" \
     -d "client_secret=$CLIENT_SECRET" \
@@ -93,7 +92,6 @@ if [ -z "$ACCESS_TOKEN" ]; then
   exit 1
 fi
 
-echo "Yükleme oturumu başlatılıyor..."
 API_URL="https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status"
 TITLE_ESCAPED=$(escape_json "$VIDEO_TITLE")
 DESC_ESCAPED=$(escape_json "$VIDEO_DESCRIPTION")
