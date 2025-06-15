@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
@@ -189,6 +190,17 @@ public class JobService {
         return List.of("default");
     }
 
+    private int parseDuration(String params) {
+        if (params == null) return 1;
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\b(\\d+)\\b").matcher(params);
+        if (m.find()) {
+            try {
+                return Integer.parseInt(m.group(1));
+            } catch (NumberFormatException ignored) {}
+        }
+        return 1;
+    }
+
     public List<ScheduleEntry> getWeeklySchedule() {
         List<Job> jobs = listJobs();
         List<ScheduleEntry> entries = new ArrayList<>();
@@ -199,7 +211,18 @@ public class JobService {
                 CronExpression cron = CronExpression.parse(job.getCronExpression());
                 java.time.LocalDateTime next = cron.next(start.minusSeconds(1));
                 while (next != null && !next.isAfter(end)) {
-                    entries.add(new ScheduleEntry(job.getName(), job.getChannel(), next));
+                    boolean isVideo = job.getScriptPath() != null && job.getScriptPath().contains("upload");
+                    boolean isStream = job.getScriptPath() != null && job.getScriptPath().contains("stream");
+                    int duration = parseDuration(job.getScriptParams());
+                    if (isStream || isVideo) {
+                        for (int i = 0; i < duration; i++) {
+                            java.time.LocalDateTime t = next.plusHours(i);
+                            if (t.isAfter(end)) break;
+                            entries.add(new ScheduleEntry(job.getName(), job.getChannel(), t, isVideo));
+                        }
+                    } else {
+                        entries.add(new ScheduleEntry(job.getName(), job.getChannel(), next, false));
+                    }
                     next = cron.next(next);
                 }
             } catch (Exception e) {
