@@ -24,6 +24,8 @@ public class JobController {
     @GetMapping
     public String listJobs(Model model) {
         model.addAttribute("jobs", jobService.listJobs());
+        model.addAttribute("scripts", jobService.listScripts());
+        model.addAttribute("channels", jobService.listChannels());
         return "list";
     }
 
@@ -63,6 +65,43 @@ public class JobController {
     public String schedulePage(Model model) {
         model.addAttribute("jobs", jobService.listJobs());
         return "schedule";
+    }
+
+    @GetMapping("/manual")
+    public String manualPage(Model model) {
+        model.addAttribute("scripts", jobService.listScripts());
+        model.addAttribute("channels", jobService.listChannels());
+        return "manual";
+    }
+
+    @PostMapping("/manual")
+    public String runManual(@RequestParam String script,
+                            @RequestParam String channel,
+                            @RequestParam(required = false) String params) {
+        Job job = new Job();
+        job.setName("manual");
+        job.setScriptPath(script);
+        job.setScriptParams(params);
+        job.setChannel(channel);
+        try {
+            jobService.runJob(job);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "redirect:/jobs";
+    }
+
+    @GetMapping("/calendar")
+    public String calendar(Model model) {
+        model.addAttribute("entries", jobService.getWeeklySchedule());
+        java.util.List<String> channels = jobService.listChannels();
+        java.util.Map<String, String> colors = new java.util.HashMap<>();
+        String[] palette = {"red","blue","green","orange","purple","brown","teal"};
+        for (int i=0;i<channels.size();i++) {
+            colors.put(channels.get(i), palette[i % palette.length]);
+        }
+        model.addAttribute("channelColors", colors);
+        return "calendar";
     }
 
     @PostMapping("/schedule")

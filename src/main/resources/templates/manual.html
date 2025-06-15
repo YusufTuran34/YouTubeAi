@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manual Run</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+</head>
+<body>
+<h2>Manuel SH Çalıştır</h2>
+<form action="/jobs/manual" method="post">
+    <label>Script:
+        <select name="script">
+            <option th:each="s : ${scripts}" th:value="${s}" th:text="${s}"></option>
+        </select>
+    </label><br/>
+    <label>Kanal:
+        <select name="channel">
+            <option th:each="c : ${channels}" th:value="${c}" th:text="${c}"></option>
+        </select>
+    </label><br/>
+    <input type="text" name="params" placeholder="Parametreler"/><br/>
+    <button type="submit">Çalıştır</button>
+</form>
+<a href="/jobs">Geri</a>
+</body>
+</html>

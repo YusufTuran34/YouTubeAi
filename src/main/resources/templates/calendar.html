@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Haftalık Takvim</title>
+    <link rel="stylesheet" th:href="@{/styles.css}" />
+    <style>
+        table.calendar { border-collapse: collapse; width: 100%; }
+        table.calendar th, table.calendar td { border: 1px solid #ccc; padding: 4px; vertical-align: top; height: 40px; }
+        table.calendar th { background: #f0f0f0; }
+        .entry { display: block; }
+    </style>
+</head>
+<body>
+<h2>Haftalık Görev Takvimi</h2>
+<table class="calendar">
+    <thead>
+    <tr>
+        <th>Saat</th>
+        <th>Pzt</th>
+        <th>Sal</th>
+        <th>Çar</th>
+        <th>Per</th>
+        <th>Cum</th>
+        <th>Cmt</th>
+        <th>Paz</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="hour : ${#numbers.sequence(0,23)}">
+        <td th:text="${hour} + ':00'"></td>
+        <td th:each="day : ${#numbers.sequence(1,7)}">
+            <div th:each="e : ${entries}" th:if="${e.time.dayOfWeek.value} == ${day} and ${e.time.hour} == ${hour}" th:text="${e.jobName}" th:style="'color:' + ${channelColors[e.channel]}" class="entry"></div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<a href="/jobs">Geri</a>
+</body>
+</html>

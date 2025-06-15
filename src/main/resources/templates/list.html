@@ -8,7 +8,9 @@
 </head>
 <body>
 <h2>Tanımlı Görevler</h2>
-<a href="/jobs/new">Yeni Görev</a> | <a href="/jobs/schedule">Sıralamayı Düzenle</a>
+<a href="/jobs/new">Yeni Görev</a> |
+<a href="/jobs/schedule">Sıralamayı Düzenle</a> |
+<a href="/jobs/calendar">Takvim</a>
 <table>
 <tr><th>Ad</th><th>Script</th><th>Param</th><th>Cron</th><th>Durum</th><th>Son Log</th><th>İşlem</th><th>Loglar</th></tr>
 <tr th:each="job : ${jobs}">
@@ -25,5 +27,21 @@
     <td><a th:href="@{'/jobs/logs/' + ${job.id}}">Görüntüle</a></td>
 </tr>
 </table>
+
+<h3>Manuel SH Çalıştır</h3>
+<form action="/jobs/manual" method="post">
+    <label>Script:
+        <select name="script">
+            <option th:each="s : ${scripts}" th:value="${s}" th:text="${s}"></option>
+        </select>
+    </label>
+    <label>Kanal:
+        <select name="channel">
+            <option th:each="c : ${channels}" th:value="${c}" th:text="${c}"></option>
+        </select>
+    </label>
+    <input type="text" name="params" placeholder="Parametreler"/>
+    <button type="submit">Çalıştır</button>
+</form>
 </body>
 </html>
