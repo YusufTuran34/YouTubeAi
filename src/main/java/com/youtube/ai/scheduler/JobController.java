@@ -30,14 +30,20 @@ public class JobController {
     }
 
     @GetMapping("/new")
-    public String newJob(Model model) {
-        model.addAttribute("job", new Job());
+    public String newJob(Model model, @RequestParam(value = "cron", required = false) String cron) {
+        Job job = new Job();
+        if (cron != null) job.setCronExpression(cron);
+        model.addAttribute("job", job);
         return "form";
     }
 
     @PostMapping
-    public String saveJob(@ModelAttribute Job job) {
+    public String saveJob(@ModelAttribute Job job,
+                          @RequestParam(value = "returnTo", required = false) String returnTo) {
         jobService.save(job);
+        if (returnTo != null && !returnTo.isBlank()) {
+            return "redirect:" + returnTo;
+        }
         return "redirect:/jobs";
     }
 
@@ -94,6 +100,8 @@ public class JobController {
     @GetMapping("/calendar")
     public String calendar(Model model) {
         model.addAttribute("entries", jobService.getWeeklySchedule());
+        java.time.LocalDateTime start = java.time.LocalDate.now().atStartOfDay();
+        model.addAttribute("startDate", start);
         java.util.List<String> channels = jobService.listChannels();
         java.util.Map<String, String> colors = new java.util.HashMap<>();
         String[] palette = {"red","blue","green","orange","purple","brown","teal"};

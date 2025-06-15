@@ -6,9 +6,13 @@
     <link rel="stylesheet" th:href="@{/styles.css}" />
     <style>
         table.calendar { border-collapse: collapse; width: 100%; }
-        table.calendar th, table.calendar td { border: 1px solid #ccc; padding: 4px; vertical-align: top; height: 40px; }
+        table.calendar th, table.calendar td { border: 1px solid #ccc; padding: 0; vertical-align: top; height: 40px; }
         table.calendar th { background: #f0f0f0; }
-        .entry { display: block; }
+        td.slot { display: flex; cursor: pointer; position: relative; }
+        .entry { flex: 1; margin: 1px; position: relative; border-radius: 3px; }
+        .entry:hover::after { content: attr(data-name); position: absolute; inset: 0; background: rgba(255,255,255,0.8); color: #000; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        #popup { display:none; position:fixed; top:20%; left:50%; transform:translate(-50%,-20%); background:#fff; padding:20px; border:1px solid #ccc; z-index:100; }
+        #popup input { margin:2px 0; }
     </style>
 </head>
 <body>
@@ -27,18 +31,47 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="hour : ${#numbers.sequence(0,23)}">
-        <td th:text="${hour} + ':00'"></td>
-        <td th:each="day : ${#numbers.sequence(1,7)}">
-            <div th:each="e : ${entries}"
-                 th:if="${e.time.dayOfWeek.value} == ${day} and ${e.time.hour} == ${hour}"
-                 th:text="${e.jobName}"
-                 th:style="'color:' + ${channelColors[e.channel]} + ';opacity:' + (${e.video} ? '0.4' : '1')"
-                 class="entry"></div>
-        </td>
-    </tr>
+<tr th:each="hour : ${#numbers.sequence(0,23)}">
+    <td th:text="${hour} + ':00'"></td>
+    <td th:each="day : ${#numbers.sequence(1,7)}" class="slot" th:data-day="${day}" th:data-hour="${hour}" onclick="openCell(this)">
+        <div th:each="e : ${entries}"
+             th:if="${e.time.dayOfWeek.value} == ${day} and ${e.time.hour} == ${hour}"
+             th:style="'background-color:' + ${channelColors[e.channel]} + ';opacity:' + (${e.video} ? '0.4' : '1')"
+             th:attr="data-name=${e.jobName}"
+             class="entry"></div>
+    </td>
+</tr>
     </tbody>
 </table>
+<div id="popup">
+    <form action="/jobs" method="post" id="popupForm">
+        <input type="text" name="name" placeholder="Görev Adı" required/><br/>
+        <input type="text" name="scriptPath" placeholder="Ana SH Dosyası"/><br/>
+        <input type="text" name="scriptParams" placeholder="Script Parametreleri"/><br/>
+        <input type="text" name="channel" placeholder="Kanal"/><br/>
+        <input type="text" name="cronExpression" id="cronField"/><br/>
+        <label>Aktif mi? <input type="checkbox" name="active" checked/></label><br/>
+        <input type="hidden" name="returnTo" value="/jobs/calendar"/>
+        <button type="submit">Kaydet</button>
+        <button type="button" onclick="closePopup()">Kapat</button>
+    </form>
+</div>
+<script th:inline="javascript">
+    var startDate = new Date('[[${#dates.format(startDate, "yyyy-MM-dd'T'HH:mm:ss")}]]');
+    function openCell(td){
+        var day = parseInt(td.dataset.day);
+        var hour = parseInt(td.dataset.hour);
+        var dt = new Date(startDate.getTime());
+        dt.setDate(dt.getDate() + (day - 1));
+        dt.setHours(hour,0,0,0);
+        var cron = '0 ' + dt.getMinutes() + ' ' + dt.getHours() + ' ' + dt.getDate() + ' ' + (dt.getMonth()+1) + ' *';
+        document.getElementById('cronField').value = cron;
+        document.getElementById('popup').style.display='block';
+    }
+    function closePopup(){
+        document.getElementById('popup').style.display='none';
+    }
+</script>
 <a href="/jobs">Geri</a>
 </body>
 </html>
