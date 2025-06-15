@@ -68,14 +68,17 @@ Use helper scripts for common tasks:
 - `sh sh_scripts/run_generation_pipeline.sh` - generate video, description, thumbnail and title sequentially.
 - `sh sh_scripts/run_pipeline_and_upload.sh <hours> [options]` - run the pipeline and optionally upload and tweet.
 - `sh sh_scripts/run_pipeline_and_stream.sh <hours> [options]` - run the pipeline then stream the result and optionally tweet.
+- `sh sh_scripts/post_instagram_story.sh` - share the first frame of the latest video as an Instagram story.
 - `sh sh_scripts/generate_gif_with_openai.sh` - create a background GIF with OpenAI (requires API key).
   Use `AI_GIF_MODEL` to choose between `dall-e-2` (supports 512x512) and `dall-e-3` (only 1024 sizes).
 
 
 When scheduling jobs via the web UI you can also specify optional parameters that
 will be passed to the script. For example a job with `scriptPath` set to
-`sh_scripts/run_pipeline_and_stream.sh` and `scriptParams` of `12 --post-twitter --tag lofi` will start a
-12 hour stream and post to Twitter using the `lofi` tag.
+`sh_scripts/run_pipeline_and_stream.sh` and `scriptParams` of `12 --post-twitter --post-instagram --tag lofi` will start a
+12 hour stream, tweet and share an Instagram story using the `lofi` tag. Likewise setting `scriptPath`
+to `sh_scripts/run_pipeline_and_upload.sh` with `scriptParams` of `6 --post-twitter --tag lofi`
+runs a six hour pipeline, uploads the result and tweets.
 
 `src/main/resources/init.sql` includes sample jobs for daily streaming, uploading,
 and a standalone tweet job that calls `post_to_twitter.sh --tag lofi`. Each job
@@ -102,3 +105,10 @@ Example of tweeting by itself:
 ```bash
 sh sh_scripts/post_to_twitter.sh --tag lofi
 ```
+
+## Instagram Posting
+Add `INSTAGRAM_USERNAME` and `INSTAGRAM_PASSWORD` to your channel configuration. Use `post_instagram_story.sh` to share a story using the first frame of the generated video:
+```bash
+sh sh_scripts/post_instagram_story.sh
+```
+Pipeline helper scripts accept `--post-instagram` to run this automatically after uploading or streaming.
