@@ -5,6 +5,10 @@ import com.youtube.ai.scheduler.model.Job;
 import com.youtube.ai.scheduler.repository.JobRepository;
 import com.youtube.ai.scheduler.repository.JobRunRepository;
 import com.youtube.ai.scheduler.model.JobRun;
+import com.youtube.ai.scheduler.model.ScheduleEntry;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.scheduling.support.CronExpression;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,5 +149,63 @@ public class JobService {
 
     public Optional<Job> get(Long id) {
         return jobRepository.findById(id);
+    }
+
+    public List<String> listScripts() {
+        File dir = new File("sh_scripts");
+        if (!dir.exists()) return Collections.emptyList();
+        String[] files = dir.list((d, name) -> name.endsWith(".sh"));
+        if (files == null) return Collections.emptyList();
+        List<String> result = new ArrayList<>();
+        for (String f : files) result.add("sh_scripts/" + f);
+        Collections.sort(result);
+        return result;
+    }
+
+    public List<String> listChannels() {
+        File env = new File("sh_scripts/channels.env");
+        if (!env.exists()) return List.of("default");
+        try {
+            String text = new String(java.nio.file.Files.readAllBytes(env.toPath()));
+            int idx = text.indexOf("CHANNEL_CONFIGS='");
+            if (idx >= 0) {
+                int start = idx + "CHANNEL_CONFIGS='".length();
+                int end = text.indexOf("'", start);
+                if (end > start) {
+                    String json = text.substring(start, end);
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode root = mapper.readTree(json);
+                    List<String> names = new ArrayList<>();
+                    for (JsonNode node : root) {
+                        JsonNode name = node.get("name");
+                        if (name != null) names.add(name.asText());
+                    }
+                    return names;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to parse channels", e);
+        }
+        return List.of("default");
+    }
+
+    public List<ScheduleEntry> getWeeklySchedule() {
+        List<Job> jobs = listJobs();
+        List<ScheduleEntry> entries = new ArrayList<>();
+        java.time.LocalDateTime start = java.time.LocalDate.now().atStartOfDay();
+        java.time.LocalDateTime end = start.plusWeeks(1);
+        for (Job job : jobs) {
+            try {
+                CronExpression cron = CronExpression.parse(job.getCronExpression());
+                java.time.LocalDateTime next = cron.next(start.minusSeconds(1));
+                while (next != null && !next.isAfter(end)) {
+                    entries.add(new ScheduleEntry(job.getName(), job.getChannel(), next));
+                    next = cron.next(next);
+                }
+            } catch (Exception e) {
+                logger.warn("Invalid cron for job {}", job.getName(), e);
+            }
+        }
+        return entries;
     }
 }
