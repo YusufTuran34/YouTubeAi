@@ -1,65 +1,39 @@
 #!/bin/bash
-# post_to_twitter.sh - Tweet using Twitter OAuth2 with PKCE (Fast & Auto token refresh)
+# post_to_twitter.sh - Tweet using twurl (no login required after first setup)
 
-echo "🐦 TWITTER POST BAŞLATILIYOR"
 set -e
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_OVERRIDE=""
-source "$SCRIPT_DIR/common.sh"
-load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
+cd "$SCRIPT_DIR"
 
-# Hızlı token kontrolü
-echo "🔍 Token durumu kontrol ediliyor..."
-if [ -f "$SCRIPT_DIR/check_twitter_token.sh" ]; then
-  if ! bash "$SCRIPT_DIR/check_twitter_token.sh" 2>/dev/null; then
-    echo "❌ Token geçersiz veya expire olmuş."
-    echo "📝 Yeni authorization code almak için:"
-    echo "   bash sh_scripts/get_twitter_auth_code.sh '$TWITTER_CLIENT_ID'"
-    exit 1
-  fi
+# Tweet mesajını oluştur
+TITLE=""
+DESCRIPTION=""
+if [ -f generated_title.txt ]; then
+  TITLE=$(head -n 1 generated_title.txt)
 fi
-
-# Access token'ı oku
-ACCESS_TOKEN=""
-if [ -f "$SCRIPT_DIR/twitter_access_token.txt" ]; then
-  ACCESS_TOKEN=$(cat "$SCRIPT_DIR/twitter_access_token.txt")
-  echo "✅ Access token okundu"
+if [ -f generated_description.txt ]; then
+  DESCRIPTION=$(head -n 1 generated_description.txt)
+fi
+if [ -z "$TITLE" ] && [ -z "$DESCRIPTION" ]; then
+  MESSAGE="Automated tweet from pipeline - $(date)"
 else
-  echo "❌ Access token bulunamadı"
-  exit 1
+  MESSAGE="$TITLE\n$DESCRIPTION"
 fi
 
-# Tweet mesajı
-MESSAGE="Automated tweet test from shell script with PKCE - $(date)"
+# Mesajı tek satıra çevir (Twitter API için)
+MESSAGE=$(echo "$MESSAGE" | tr '\n' ' ')
 
-# JSON güvenli hale getir
-JSON_PAYLOAD=$(printf '%s' "$MESSAGE" | jq -Rs '{text: .}')
+# twurl ile tweet at
+RESPONSE=$(twurl -d "status=$MESSAGE" "/1.1/statuses/update.json" 2>&1)
 
-echo "📤 Tweet gönderiliyor: $MESSAGE"
-
-# Tweet gönder (timeout ile)
-RESPONSE=$(timeout 30 curl -s -X POST "https://api.twitter.com/2/tweets" \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "$JSON_PAYLOAD")
-
-# Timeout kontrolü
-if [ $? -eq 124 ]; then
-  echo "⏰ Tweet gönderme zaman aşımına uğradı"
+# Sonucu kontrol et
+if echo "$RESPONSE" | grep -q '"id"'; then
+  TWEET_ID=$(echo "$RESPONSE" | jq -r '.id_str')
+  USER_SCREEN_NAME=$(echo "$RESPONSE" | jq -r '.user.screen_name')
+  echo "✅ Tweet başarıyla gönderildi!"
+  echo "🔗 Link: https://twitter.com/$USER_SCREEN_NAME/status/$TWEET_ID"
+else
+  echo "❌ Tweet gönderilemedi!"
+  echo "🔍 Response: $RESPONSE"
   exit 1
 fi
-
-# Response kontrolü
-ERROR=$(echo "$RESPONSE" | jq -r '.errors[0].message // empty')
-if [ -n "$ERROR" ]; then
-  echo "❌ Tweet gönderme hatası: $ERROR"
-  echo "⚠️  Token geçersiz olabilir, yeni authorization code gerekli."
-  exit 1
-fi
-
-TWEET_ID=$(echo "$RESPONSE" | jq -r '.data.id')
-echo "✅ Tweet başarıyla gönderildi!"
-echo "🆔 Tweet ID: $TWEET_ID"
-echo "📝 Mesaj: $MESSAGE"
-echo "🔗 Link: https://twitter.com/user/status/$TWEET_ID"
