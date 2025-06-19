@@ -8,14 +8,20 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_OVERRIDE=""
 source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
-echo "SEND TWIT INITIALIZE 2"
 
 # Config verilerini oku
 CLIENT_ID="$TWITTER_CLIENT_ID"
+CLIENT_SECRET="$TWITTER_CLIENT_SECRET"
 AUTH_CODE="$TWITTER_AUTH_CODE"
 CODE_VERIFIER="$TWITTER_CODE_VERIFIER"
 REDIRECT_URI="http://localhost:8888/callback"
 TOKEN_URL="https://api.twitter.com/2/oauth2/token"
+
+echo "[DEBUG] CLIENT_ID=$CLIENT_ID"
+echo "[DEBUG] CLIENT_SECRET=$CLIENT_SECRET"
+echo "[DEBUG] AUTH_CODE=$AUTH_CODE"
+echo "[DEBUG] CODE_VERIFIER=$CODE_VERIFIER"
+echo "SEND TWIT INITIALIZE 2"
 
 # Kodlar eksikse çık
 if [ -z "$CLIENT_ID" ] || [ -z "$AUTH_CODE" ] || [ -z "$CODE_VERIFIER" ]; then
@@ -23,9 +29,20 @@ if [ -z "$CLIENT_ID" ] || [ -z "$AUTH_CODE" ] || [ -z "$CODE_VERIFIER" ]; then
   exit 1
 fi
 
-# Token alma isteği
+# Token alma isteği (Authorization header ile, body'de client_secret yok)
+BASIC_AUTH=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
+echo "[DEBUG] Sending request to: $TOKEN_URL"
+echo "[DEBUG] Basic Auth: $BASIC_AUTH"
+echo "[DEBUG] Parameters:"
+echo "  - grant_type=authorization_code"
+echo "  - client_id=$CLIENT_ID"
+echo "  - redirect_uri=$REDIRECT_URI"
+echo "  - code=$AUTH_CODE"
+echo "  - code_verifier=$CODE_VERIFIER"
+
 RESPONSE=$(curl -s -X POST "$TOKEN_URL" \
   -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic $BASIC_AUTH" \
   -d "grant_type=authorization_code" \
   -d "client_id=$CLIENT_ID" \
   -d "redirect_uri=$REDIRECT_URI" \

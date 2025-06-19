@@ -19,27 +19,32 @@ load_channel_config() {
       echo "$json" | jq -r 'paths(scalars) as $p |
         [($p|join(".")), (getpath($p))] | @tsv' > "$tmpfile"
 
-      while IFS="$(printf '\t')" read -r path value; do
-        case "$path" in
-          youtube.CLIENT_ID) CLIENT_ID="$value" ;;
-          youtube.CLIENT_SECRET) CLIENT_SECRET="$value" ;;
-          youtube.REFRESH_TOKEN) REFRESH_TOKEN="$value" ;;
-          youtube.STREAM_KEY) YOUTUBE_STREAM_KEY="$value" ;;
-          twitter.API_KEY) TWITTER_API_KEY="$value" ;;
-          twitter.API_SECRET) TWITTER_API_SECRET="$value" ;;
-          twitter.ACCESS_TOKEN) TWITTER_ACCESS_TOKEN="$value" ;;
-          twitter.ACCESS_SECRET) TWITTER_ACCESS_SECRET="$value" ;;
-          twitter.CLIENT_ID) TWITTER_CLIENT_ID="$value" ;;
-          twitter.CLIENT_SECRET) TWITTER_CLIENT_SECRET="$value" ;;
-          twitter.TWITTER_AUTH_CODE) TWITTER_AUTH_CODE="$value" ;;
-          twitter.TWITTER_CODE_VERIFIER) TWITTER_CODE_VERIFIER="$value" ;;
-          instagram.USERNAME) INSTAGRAM_USERNAME="$value" ;;
-          instagram.PASSWORD) INSTAGRAM_PASSWORD="$value" ;;
-          *)
-            key=$(echo "$path" | tr '.-' '_')
-            eval "export $key=\"\$value\"" ;;
-        esac
-      done < "$tmpfile"
+            while IFS="$(printf '\t')" read -r path value; do
+              case "$path" in
+                youtube.CLIENT_ID) export CLIENT_ID="$value" ;;
+                youtube.CLIENT_SECRET) export CLIENT_SECRET="$value" ;;
+                youtube.REFRESH_TOKEN) export REFRESH_TOKEN="$value" ;;
+                youtube.STREAM_KEY) export YOUTUBE_STREAM_KEY="$value" ;;
+
+                twitter.API_KEY) export TWITTER_API_KEY="$value" ;;
+                twitter.API_SECRET) export TWITTER_API_SECRET="$value" ;;
+                twitter.ACCESS_TOKEN) export TWITTER_ACCESS_TOKEN="$value" ;;
+                twitter.ACCESS_SECRET) export TWITTER_ACCESS_SECRET="$value" ;;
+                twitter.CLIENT_ID) export TWITTER_CLIENT_ID="$value" ;;
+                twitter.CLIENT_SECRET) export TWITTER_CLIENT_SECRET="$value" ;;
+                twitter.TWITTER_AUTH_CODE) export TWITTER_AUTH_CODE="$value" ;;
+                twitter.TWITTER_CODE_VERIFIER) export TWITTER_CODE_VERIFIER="$value" ;;
+
+                instagram.USERNAME) export INSTAGRAM_USERNAME="$value" ;;
+                instagram.PASSWORD) export INSTAGRAM_PASSWORD="$value" ;;
+
+                *)
+                  key=$(echo "$path" | tr '.-' '_')
+                  export "$key"="$value"
+                  ;;
+              esac
+            done < "$tmpfile"
+
 
       rm -f "$tmpfile"
     else
