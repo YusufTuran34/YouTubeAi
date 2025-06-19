@@ -129,25 +129,92 @@ if [ -z "$UPLOAD_URL" ]; then
   exit 1
 fi
 
+# Chunked upload için dosya boyutunu al
+FILE_SIZE=$(stat -f%z "$VIDEO_PATH" 2>/dev/null || stat -c%s "$VIDEO_PATH" 2>/dev/null)
+CHUNK_SIZE=10485760  # 10MB chunks
+TOTAL_CHUNKS=$(( (FILE_SIZE + CHUNK_SIZE - 1) / CHUNK_SIZE ))
+
+echo "📁 Video boyutu: $FILE_SIZE bytes"
+echo "📦 Chunk boyutu: $CHUNK_SIZE bytes"
+echo "🔢 Toplam chunk: $TOTAL_CHUNKS"
+
+# İlk chunk'ı yükle (Content-Range header ile)
+FIRST_CHUNK_END=$((CHUNK_SIZE - 1))
+if [ $FIRST_CHUNK_END -gt $FILE_SIZE ]; then
+  FIRST_CHUNK_END=$((FILE_SIZE - 1))
+fi
+
+# İlk chunk'ı geçici dosyaya çıkar
+FIRST_CHUNK_FILE=$(mktemp)
+dd if="$VIDEO_PATH" of="$FIRST_CHUNK_FILE" bs=$CHUNK_SIZE count=1 2>/dev/null
+
 TMP_RES_FILE=$(mktemp)
 HTTP_CODE=$(curl -s -X PUT \
     -H "Authorization: Bearer $ACCESS_TOKEN" \
     -H "Content-Type: video/mp4" \
-    --data-binary "@$VIDEO_PATH" \
+    -H "Content-Range: bytes 0-$FIRST_CHUNK_END/$FILE_SIZE" \
+    --data-binary "@$FIRST_CHUNK_FILE" \
     -o "$TMP_RES_FILE" -w "%{http_code}" \
     "$UPLOAD_URL")
-if [ "$HTTP_CODE" -ne 200 ] && [ "$HTTP_CODE" -ne 201 ]; then
-  echo "HATA: Video yükleme başarısız (HTTP $HTTP_CODE)."
-  cat "$TMP_RES_FILE"
-  rm -f "$TMP_RES_FILE"
-  exit 1
-fi
-UPLOAD_RESPONSE="$(cat "$TMP_RES_FILE")"
-rm -f "$TMP_RES_FILE"
-VIDEO_ID=$(echo "$UPLOAD_RESPONSE" | grep -m1 '"id":' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
-if [ -z "$VIDEO_ID" ]; then
-  echo "HATA: Video ID alınamadı!"
-  exit 1
+
+if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
+  echo "✅ Video başarıyla yüklendi!"
+  UPLOAD_RESPONSE="$(cat "$TMP_RES_FILE")"
+  rm -f "$TMP_RES_FILE" "$FIRST_CHUNK_FILE"
+  VIDEO_ID=$(echo "$UPLOAD_RESPONSE" | grep -m1 '"id":' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+  if [ -z "$VIDEO_ID" ]; then
+    echo "HATA: Video ID alınamadı!"
+    exit 1
+  fi
+else
+  echo "⚠️  Tek seferlik yükleme başarısız (HTTP $HTTP_CODE), chunked upload deneniyor..."
+  
+  # Chunked upload için dd kullan
+  CHUNK_FILE=$(mktemp)
+  OFFSET=0
+  
+  for ((i=1; i<=TOTAL_CHUNKS; i++)); do
+    echo "📤 Chunk $i/$TOTAL_CHUNKS yükleniyor..."
+    
+    # Chunk'ı dosyadan çıkar
+    dd if="$VIDEO_PATH" of="$CHUNK_FILE" bs=$CHUNK_SIZE skip=$((OFFSET / CHUNK_SIZE)) count=1 2>/dev/null
+    
+    CHUNK_SIZE_ACTUAL=$(stat -f%z "$CHUNK_FILE" 2>/dev/null || stat -c%s "$CHUNK_FILE" 2>/dev/null)
+    CHUNK_START=$OFFSET
+    CHUNK_END=$((OFFSET + CHUNK_SIZE_ACTUAL - 1))
+    
+    HTTP_CODE=$(curl -s -X PUT \
+        -H "Authorization: Bearer $ACCESS_TOKEN" \
+        -H "Content-Type: video/mp4" \
+        -H "Content-Range: bytes $CHUNK_START-$CHUNK_END/$FILE_SIZE" \
+        --data-binary "@$CHUNK_FILE" \
+        -o "$TMP_RES_FILE" -w "%{http_code}" \
+        "$UPLOAD_URL")
+    
+    if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
+      echo "✅ Chunk $i başarıyla yüklendi!"
+      UPLOAD_RESPONSE="$(cat "$TMP_RES_FILE")"
+      VIDEO_ID=$(echo "$UPLOAD_RESPONSE" | grep -m1 '"id":' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+      if [ -n "$VIDEO_ID" ]; then
+        break
+      fi
+    elif [ "$HTTP_CODE" -eq 308 ]; then
+      echo "📤 Chunk $i yüklendi, devam ediliyor..."
+      OFFSET=$((OFFSET + CHUNK_SIZE_ACTUAL))
+    else
+      echo "❌ Chunk $i yükleme hatası (HTTP $HTTP_CODE)"
+      cat "$TMP_RES_FILE"
+      rm -f "$TMP_RES_FILE" "$CHUNK_FILE" "$FIRST_CHUNK_FILE"
+      exit 1
+    fi
+  done
+  
+  rm -f "$TMP_RES_FILE" "$CHUNK_FILE" "$FIRST_CHUNK_FILE"
+  
+  if [ -z "$VIDEO_ID" ]; then
+    echo "HATA: Video yükleme tamamlanamadı!"
+    exit 1
+  fi
 fi
 
 if [ -n "$THUMB_PATH" ]; then
