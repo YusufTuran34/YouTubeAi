@@ -96,7 +96,7 @@ API_URL="https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumabl
 TITLE_ESCAPED=$(escape_json "$VIDEO_TITLE")
 DESC_ESCAPED=$(escape_json "$VIDEO_DESCRIPTION")
 [ -z "$VIDEO_CATEGORY" ] && VIDEO_CATEGORY="22"
-[ -z "$VIDEO_PRIVACY" ] && VIDEO_PRIVACY="unlisted"
+[ -z "$VIDEO_PRIVACY" ] && VIDEO_PRIVACY="private"
 JSON_DATA=$(cat <<EOF
 {
   "snippet": {
