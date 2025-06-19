@@ -151,6 +151,7 @@ ffmpeg -y -stream_loop -1 -i "$VIDEO_FILE" \
     -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,fps=${GIF_FPS:-30}" \
     -c:v ${VIDEO_CODEC:-libx264} -preset ${PRESET:-ultrafast} -pix_fmt yuv420p \
     -c:a ${AUDIO_CODEC:-aac} -b:a ${AUDIO_BITRATE:-160k} \
+    -movflags +faststart \
     -t "$TARGET_SECONDS" "$OUTPUT_VIDEO"
 
 if [ $? -ne 0 ]; then

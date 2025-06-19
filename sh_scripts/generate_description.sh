@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # generate_description.sh - Create SEO friendly description via OpenAI
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -26,7 +26,6 @@ if [ -n "$OPENAI_API_KEY" ] && command -v curl >/dev/null 2>&1 && command -v jq 
         -d "{\"model\":\"${OPENAI_MODEL:-gpt-3.5-turbo}\",\"messages\":[{\"role\":\"user\",\"content\":\"$PROMPT\"}],\"max_tokens\":200}")
     DESCRIPTION=$(echo "$RESPONSE" | jq -r '.choices[0].message.content' | tr -d '\r')
 fi
-
 if [ -z "$DESCRIPTION" ] || [ "$DESCRIPTION" = "null" ]; then
     # Eski basit açıklama şablonu
     if [ "$DURATION_INT" -lt 900 ]; then
