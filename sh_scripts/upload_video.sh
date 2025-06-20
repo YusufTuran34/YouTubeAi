@@ -218,10 +218,22 @@ else
 fi
 
 if [ -n "$THUMB_PATH" ]; then
+  # Thumbnail yüklemeden önce access token'ı tekrar yenile
+  ACCESS_TOKEN_THUMB=$(curl -s -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "client_id=$CLIENT_ID" \
+    -d "client_secret=$CLIENT_SECRET" \
+    -d "refresh_token=$REFRESH_TOKEN" \
+    -d "grant_type=refresh_token" \
+    "https://accounts.google.com/o/oauth2/token" \
+    | awk -F'"' '/access_token/ {print $4}' )
+  if [ -z "$ACCESS_TOKEN_THUMB" ]; then
+    echo "HATA: Thumbnail için erişim tokenı alınamadı."
+    exit 1
+  fi
   TMP_THUMB_RES=$(mktemp)
   THUMB_URL="https://www.googleapis.com/upload/youtube/v3/thumbnails/set?videoId=${VIDEO_ID}&uploadType=media"
   HTTP_CODE=$(curl -s -X POST \
-      -H "Authorization: Bearer $ACCESS_TOKEN" \
+      -H "Authorization: Bearer $ACCESS_TOKEN_THUMB" \
       -H "Content-Type: image/jpeg" \
       --data-binary "@$THUMB_PATH" \
       -o "$TMP_THUMB_RES" -w "%{http_code}" \
