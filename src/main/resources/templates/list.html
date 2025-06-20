@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Job List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
@@ -12,7 +13,7 @@
 <a href="/jobs/schedule">Sıralamayı Düzenle</a> |
 <a href="/jobs/calendar">Takvim</a>
 <table>
-<tr><th>Ad</th><th>Script</th><th>Param</th><th>Cron</th><th>Durum</th><th>Son Log</th><th>İşlem</th><th>Loglar</th></tr>
+<tr><th>Ad</th><th>Script</th><th>Param</th><th>Cron</th><th>Durum</th><th>Son Log</th><th>İşlem</th><th>Loglar</th><th>Canlı</th></tr>
 <tr th:each="job : ${jobs}">
     <td th:text="${job.name}">Ad</td>
     <td th:text="${job.scriptPath}">Script</td>
@@ -25,6 +26,7 @@
         <a th:href="@{'/jobs/delete/' + ${job.id}}">Sil</a>
     </td>
     <td><a th:href="@{'/jobs/logs/' + ${job.id}}">Görüntüle</a></td>
+    <td th:text="${runningIds.contains(job.id)} ? 'Evet' : '-'">run</td>
 </tr>
 </table>
 

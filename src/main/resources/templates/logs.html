@@ -3,10 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Job Logs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
 <h2 th:text="${job.name}">Job</h2>
+<div th:if="${running}">
+    <h3>Canlı Log</h3>
+    <pre id="liveLog" style="max-height:200px;overflow:auto;background:#000;color:#0f0;padding:5px;"></pre>
+</div>
+<script th:inline="javascript">
+/*<![CDATA[*/
+const running = [[${running}]];
+const jobId = [[${job.id}]];
+if (running) {
+    const pre = document.getElementById('liveLog');
+    function fetchLog(){
+        fetch('/jobs/live/' + jobId)
+            .then(r => r.text())
+            .then(t => pre.textContent = t);
+    }
+    fetchLog();
+    setInterval(fetchLog, 2000);
+}
+/*]]>*/
+</script>
 <table>
 <tr><th>Zaman</th><th>Exit</th><th>Log</th></tr>
 <tr th:each="run : ${runs}">
