@@ -1,5 +1,6 @@
 body {
-    margin-top: 4.5rem;
+    /* Extra space to prevent the fixed header from covering content */
+    padding-top: 5rem;
 }
 
 .table-responsive {
@@ -12,4 +13,12 @@ pre#liveLog {
     padding:5px;
     max-height:200px;
     overflow:auto;
+}
+
+/* Keep parameter column compact */
+.param-col {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
