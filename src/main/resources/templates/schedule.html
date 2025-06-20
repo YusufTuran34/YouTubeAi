@@ -4,21 +4,26 @@
     <meta charset="UTF-8">
     <title>Job Schedule</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.1/dist/flatly/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/styles.css}" />
     <style>
     ul { list-style-type: none; padding: 0; }
-    li { margin: 5px; padding: 5px; background: #eee; cursor: move; }
+    li { margin: 5px; padding: 5px; cursor: move; }
     </style>
 </head>
 <body>
-<h2>Görev Sıralaması</h2>
-<form action="/jobs/schedule" method="post" id="form">
-    <ul id="jobList">
-        <li th:each="job : ${jobs}" th:data-id="${job.id}" th:text="${job.name}"></li>
-    </ul>
-    <input type="hidden" name="order" id="order" />
-    <button type="submit">Kaydet</button>
-</form>
+<div th:replace="fragments/navbar :: navbar"></div>
+<div class="container py-4">
+    <h2>Görev Sıralaması</h2>
+    <form action="/jobs/schedule" method="post" id="form">
+        <ul id="jobList" class="list-group mb-3">
+            <li class="list-group-item" th:each="job : ${jobs}" th:data-id="${job.id}" th:text="${job.name}"></li>
+        </ul>
+        <input type="hidden" name="order" id="order" />
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+    </form>
+    <a href="/jobs" class="btn btn-secondary mt-3">Geri</a>
+</div>
 <script>
     const list = document.getElementById('jobList');
     let drag;
@@ -38,6 +43,6 @@
     });
     Array.from(list.children).forEach(li => li.setAttribute('draggable','true'));
 </script>
-<a href="/jobs">Geri</a>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
