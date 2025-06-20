@@ -80,7 +80,23 @@ def setup_driver():
         return None
 
 def get_tweet_message():
-    """Get tweet message from generated files"""
+    """Get tweet message from generate_tweet.sh script"""
+    try:
+        # Run the generate_tweet.sh script to get SEO-friendly tweet text
+        result = subprocess.run(['bash', 'generate_tweet.sh'], 
+                              capture_output=True, text=True, cwd=os.getcwd())
+        
+        if result.returncode == 0 and result.stdout.strip():
+            message = result.stdout.strip()
+            print(f"📝 ChatGPT ile oluşturulan tweet: {message}")
+            return message
+        else:
+            print(f"⚠️ generate_tweet.sh çalıştırılamadı: {result.stderr}")
+    except Exception as e:
+        print(f"⚠️ generate_tweet.sh hatası: {e}")
+    
+    # Fallback to old method if script fails
+    print("📝 Fallback tweet metni oluşturuluyor...")
     title = ""
     description = ""
     video_url = ""
