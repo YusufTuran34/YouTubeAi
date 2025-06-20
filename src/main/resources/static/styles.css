@@ -22,3 +22,16 @@ pre#liveLog {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.script-col {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 576px) {
+    .script-col {
+        max-width: 120px;
+    }
+}

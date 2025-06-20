@@ -16,7 +16,11 @@
             <input type="text" th:field="*{name}" placeholder="Görev Adı" class="form-control" />
         </div>
         <div class="col-md-6">
-            <input type="text" th:field="*{scriptPath}" placeholder="Ana SH Dosyası" class="form-control" />
+            <label class="form-label w-100">Script
+                <select th:field="*{scriptPath}" class="form-select">
+                    <option th:each="s : ${scripts}" th:value="${s}" th:text="${s}"></option>
+                </select>
+            </label>
         </div>
         <div class="col-md-6">
             <input type="text" th:field="*{scriptParams}" placeholder="Script Parametreleri" class="form-control" />

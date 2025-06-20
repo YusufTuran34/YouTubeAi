@@ -23,10 +23,18 @@ public class JobController {
 
     @GetMapping
     public String listJobs(Model model) {
-        model.addAttribute("jobs", jobService.listJobs());
+        java.util.List<Job> jobs = jobService.listJobs();
+        java.util.Map<Long, String> nextRuns = new java.util.HashMap<>();
+        java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("MM/dd HH:mm");
+        for (Job j : jobs) {
+            java.time.LocalDateTime t = jobService.getNextRunTime(j);
+            if (t != null) nextRuns.put(j.getId(), t.format(fmt));
+        }
+        model.addAttribute("jobs", jobs);
         model.addAttribute("scripts", jobService.listScripts());
         model.addAttribute("channels", jobService.listChannels());
         model.addAttribute("runningIds", jobService.getRunningJobIds());
+        model.addAttribute("nextRuns", nextRuns);
         return "list";
     }
 
@@ -35,6 +43,8 @@ public class JobController {
         Job job = new Job();
         if (cron != null) job.setCronExpression(cron);
         model.addAttribute("job", job);
+        model.addAttribute("scripts", jobService.listScripts());
+        model.addAttribute("channels", jobService.listChannels());
         return "form";
     }
 
