@@ -58,7 +58,7 @@
     </form>
 </div>
 <script th:inline="javascript">
-    var startDate = new Date('[[${#dates.format(startDate, "yyyy-MM-dd'T'HH:mm:ss")}]]');
+    var startDate = new Date('[[${#temporals.format(startDate, "yyyy-MM-dd'T'HH:mm:ss")}]]');
     function openCell(td){
         var day = parseInt(td.dataset.day);
         var hour = parseInt(td.dataset.hour);
