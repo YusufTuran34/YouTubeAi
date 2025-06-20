@@ -182,9 +182,19 @@ public class JobService {
         String[] files = dir.list((d, name) -> name.endsWith(".sh"));
         if (files == null) return Collections.emptyList();
         List<String> result = new ArrayList<>();
-        for (String f : files) result.add("sh_scripts/" + f);
+        for (String f : files) result.add(f);
         Collections.sort(result);
         return result;
+    }
+
+    public java.time.LocalDateTime getNextRunTime(Job job) {
+        try {
+            CronExpression cron = CronExpression.parse(job.getCronExpression());
+            return cron.next(java.time.LocalDateTime.now());
+        } catch (Exception e) {
+            logger.warn("Invalid cron for job {}", job.getName(), e);
+            return null;
+        }
     }
 
     public List<String> listChannels() {
