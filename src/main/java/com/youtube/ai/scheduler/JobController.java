@@ -26,6 +26,7 @@ public class JobController {
         model.addAttribute("jobs", jobService.listJobs());
         model.addAttribute("scripts", jobService.listScripts());
         model.addAttribute("channels", jobService.listChannels());
+        model.addAttribute("runningIds", jobService.getRunningJobIds());
         return "list";
     }
 
@@ -64,7 +65,14 @@ public class JobController {
         Job job = jobService.get(id).orElseThrow();
         model.addAttribute("job", job);
         model.addAttribute("runs", jobRunRepository.findByJobIdOrderByRunTimeDesc(id));
+        model.addAttribute("running", jobService.isRunning(id));
         return "logs";
+    }
+
+    @GetMapping("/live/{id}")
+    @ResponseBody
+    public String liveLog(@PathVariable Long id) {
+        return jobService.getCurrentLog(id);
     }
 
     @GetMapping("/schedule")

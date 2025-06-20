@@ -21,6 +21,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class JobService {
@@ -31,6 +32,7 @@ public class JobService {
     private final TaskScheduler scheduler;
     private final JobRunRepository jobRunRepository;
     private final Map<Long, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
+    private final Map<Long, StringBuilder> runningLogs = new ConcurrentHashMap<>();
 
     public JobService(JobRepository jobRepository, JobRunRepository jobRunRepository) {
         this.jobRepository = jobRepository;
@@ -70,6 +72,7 @@ public class JobService {
 
         logger.info("Starting job '{}' with scripts {}", job.getName(), scripts);
         StringBuilder logBuilder = new StringBuilder();
+        runningLogs.put(job.getId(), new StringBuilder());
         int exitCode = 0;
 
         for (String script : scripts) {
@@ -94,6 +97,13 @@ public class JobService {
                     String prefixed = "[JOB-" + job.getId() + "] " + line;
                     System.out.println(prefixed);
                     logBuilder.append(prefixed).append("\n");
+                    StringBuilder live = runningLogs.get(job.getId());
+                    if (live != null) {
+                        live.append(prefixed).append("\n");
+                        if (live.length() > 1000) {
+                            live.delete(0, live.length() - 1000);
+                        }
+                    }
                 }
             }
             exitCode = proc.waitFor();
@@ -114,6 +124,7 @@ public class JobService {
         run.setLog(log);
         run.setExitCode(exitCode);
         jobRunRepository.save(run);
+        runningLogs.remove(job.getId());
     }
 
     public void runNow(Long jobId) {
@@ -150,6 +161,19 @@ public class JobService {
 
     public Optional<Job> get(Long id) {
         return jobRepository.findById(id);
+    }
+
+    public boolean isRunning(Long id) {
+        return runningLogs.containsKey(id);
+    }
+
+    public String getCurrentLog(Long id) {
+        StringBuilder sb = runningLogs.get(id);
+        return sb == null ? "" : sb.toString();
+    }
+
+    public Set<Long> getRunningJobIds() {
+        return runningLogs.keySet();
     }
 
     public List<String> listScripts() {
