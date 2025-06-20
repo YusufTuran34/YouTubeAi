@@ -112,14 +112,16 @@ EOF
 )
 
 TMP_HDR_FILE=$(mktemp)
+TMP_RESPONSE_FILE=$(mktemp)
 HTTP_CODE=$(curl -s -X POST "$API_URL" \
     -H "Authorization: Bearer $ACCESS_TOKEN" \
     -H "Content-Type: application/json; charset=UTF-8" \
     -d "$JSON_DATA" \
-    -o /dev/null -D "$TMP_HDR_FILE" -w "%{http_code}")
+    -o "$TMP_RESPONSE_FILE" -D "$TMP_HDR_FILE" -w "%{http_code}")
 if [ "$HTTP_CODE" -ne 200 ] && [ "$HTTP_CODE" -ne 201 ]; then
   echo "HATA: Yükleme oturumu başlatılamadı (HTTP $HTTP_CODE)."
-  rm -f "$TMP_HDR_FILE"
+  echo "🔍 Response: $(cat "$TMP_RESPONSE_FILE")"
+  rm -f "$TMP_HDR_FILE" "$TMP_RESPONSE_FILE"
   exit 1
 fi
 UPLOAD_URL=$(grep -i "location:" "$TMP_HDR_FILE" | awk '{print $2}' | tr -d '\r')
@@ -248,3 +250,18 @@ if [ -n "$THUMB_PATH" ]; then
 fi
 
 echo "✅ Video yüklendi! YouTube Link: https://youtu.be/$VIDEO_ID"
+
+# --post-twitter flag kontrolü
+POST_TWITTER=false
+for arg in "$@"; do
+  if [ "$arg" = "--post-twitter" ]; then
+    POST_TWITTER=true
+    break
+  fi
+done
+
+# Sadece --post-twitter flag'i varsa tweet at
+if [ "$POST_TWITTER" = true ]; then
+  echo "📢 Video yüklendi, Twitter'a otomatik tweet atılıyor..."
+  bash "$SCRIPT_DIR/post_to_twitter_twurl.sh" "$CONFIG_OVERRIDE"
+fi

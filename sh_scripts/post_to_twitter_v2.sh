@@ -9,41 +9,75 @@ CONFIG_OVERRIDE=""
 source "$SCRIPT_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
-# Twitter API v2 bilgileri
-API_KEY="$TWITTER_API_KEY"
-API_SECRET="$TWITTER_API_SECRET"
-ACCESS_TOKEN="$TWITTER_ACCESS_TOKEN"
-ACCESS_SECRET="$TWITTER_ACCESS_SECRET"
+# Twitter API v2 bilgileri (OAuth 2.0 User Context)
+CLIENT_ID="$TWITTER_CLIENT_ID"
+CLIENT_SECRET="$TWITTER_CLIENT_SECRET"
+AUTH_CODE="$TWITTER_AUTH_CODE"
+CODE_VERIFIER="$TWITTER_CODE_VERIFIER"
 
 echo "🔍 Twitter API v2 bilgileri kontrol ediliyor..."
 
 # Gerekli parametreleri kontrol et
-if [ -z "$API_KEY" ] || [ -z "$API_SECRET" ] || [ -z "$ACCESS_TOKEN" ] || [ -z "$ACCESS_SECRET" ]; then
+if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$AUTH_CODE" ] || [ -z "$CODE_VERIFIER" ]; then
   echo "❌ Eksik Twitter API bilgileri!"
-  echo "   API_KEY: $API_KEY"
-  echo "   API_SECRET: $API_SECRET"
-  echo "   ACCESS_TOKEN: $ACCESS_TOKEN"
-  echo "   ACCESS_SECRET: $ACCESS_SECRET"
+  echo "   CLIENT_ID: $CLIENT_ID"
+  echo "   CLIENT_SECRET: $CLIENT_SECRET"
+  echo "   AUTH_CODE: $AUTH_CODE"
+  echo "   CODE_VERIFIER: $CODE_VERIFIER"
   exit 1
 fi
 
 echo "✅ Twitter API bilgileri mevcut"
 
-# Bearer Token oluştur (Base64 encoded API_KEY:API_SECRET)
-BEARER_TOKEN=$(echo -n "$API_KEY:$API_SECRET" | base64)
+# Tweet mesajını oluştur
+TITLE=""
+DESCRIPTION=""
+if [ -f generated_title.txt ]; then
+  TITLE=$(head -n 1 generated_title.txt)
+fi
+if [ -f generated_description.txt ]; then
+  DESCRIPTION=$(head -n 1 generated_description.txt)
+fi
+if [ -z "$TITLE" ] && [ -z "$DESCRIPTION" ]; then
+  MESSAGE="Automated tweet from shell script using Twitter API v2 - $(date)"
+else
+  MESSAGE="$TITLE $DESCRIPTION"
+fi
 
-echo "🔑 Bearer Token oluşturuldu"
-
-# Tweet mesajı
-MESSAGE="Automated tweet from shell script using Twitter API v2 - $(date)"
+# Mesajı kısalt (Twitter 280 karakter limiti)
+if [ ${#MESSAGE} -gt 280 ]; then
+  MESSAGE="${MESSAGE:0:277}..."
+fi
 
 echo "📤 Tweet gönderiliyor: $MESSAGE"
 
-# Tweet gönder
+# Access token al (OAuth 2.0 PKCE)
+TOKEN_RESPONSE=$(curl -s -X POST "https://api.twitter.com/2/oauth2/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Basic $(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)" \
+  -d "grant_type=authorization_code" \
+  -d "client_id=$CLIENT_ID" \
+  -d "redirect_uri=http://localhost:8888/callback" \
+  -d "code=$AUTH_CODE" \
+  -d "code_verifier=$CODE_VERIFIER")
+
+ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | jq -r '.access_token')
+
+if [ "$ACCESS_TOKEN" == "null" ] || [ -z "$ACCESS_TOKEN" ]; then
+  echo "❌ Access token alınamadı"
+  echo "🔍 Response: $TOKEN_RESPONSE"
+  exit 1
+fi
+
+echo "🔑 Access token alındı"
+
+# Tweet gönder (OAuth 2.0 User Context)
+JSON_PAYLOAD=$(printf '%s' "$MESSAGE" | jq -Rs '{text: .}')
+
 RESPONSE=$(curl -s -X POST "https://api.twitter.com/2/tweets" \
-  -H "Authorization: Bearer $BEARER_TOKEN" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d "{\"text\":\"$MESSAGE\"}")
+  -d "$JSON_PAYLOAD")
 
 echo "🔍 Raw response: $RESPONSE"
 

@@ -61,3 +61,30 @@ load_channel_config() {
     . "$override"
   fi
 }
+
+# Load Twitter credentials from channels.env
+load_twitter_credentials() {
+    export $(grep -o 'API_KEY".*' channels.env | head -1 | sed 's/.*API_KEY": "\([^"]*\)".*/TWITTER_API_KEY=\1/')
+    export $(grep -o 'API_SECRET".*' channels.env | head -1 | sed 's/.*API_SECRET": "\([^"]*\)".*/TWITTER_API_SECRET=\1/')
+}
+
+# Get tweet message from generated_title.txt and generated_description.txt
+get_tweet_message() {
+    local title=""
+    local desc=""
+    if [ -f generated_title.txt ]; then
+        title="$(cat generated_title.txt | head -1 | tr -d '\n')"
+    fi
+    if [ -f generated_description.txt ]; then
+        desc="$(cat generated_description.txt | head -1 | tr -d '\n')"
+    fi
+    if [ -n "$title" ] || [ -n "$desc" ]; then
+        export TWEET_MESSAGE="$title $desc"
+    else
+        export TWEET_MESSAGE="Automated tweet from twurl $(date)"
+    fi
+    # Twitter 280 karakter limiti
+    if [ ${#TWEET_MESSAGE} -gt 280 ]; then
+        export TWEET_MESSAGE="${TWEET_MESSAGE:0:277}..."
+    fi
+}
