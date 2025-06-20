@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-<div th:replace="fragments/navbar :: navbar"></div>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 <div class="container py-4">
     <h2>Görev Sıralaması</h2>
     <form action="/jobs/schedule" method="post" id="form">

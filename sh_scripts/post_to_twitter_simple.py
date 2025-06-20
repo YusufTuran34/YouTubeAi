@@ -13,9 +13,22 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 
 def load_channel_config():
-    """Load channel configuration from channels.env"""
+    """Load channel configuration from channels.env or environment variables"""
     try:
-        # Source the channels.env file and get the environment variable
+        # First try to get from environment variables (when running from Spring Boot)
+        username = os.environ.get('TWITTER_USERNAME', '')
+        password = os.environ.get('TWITTER_PASSWORD', '')
+        twitter_username = os.environ.get('TWITTER_HANDLE', '')
+        
+        if username and password:
+            print(f"✅ Environment variables'den yüklendi: {username}")
+            return {
+                'username': username,
+                'password': password,
+                'twitter_username': twitter_username
+            }
+        
+        # Fallback: try to source the channels.env file
         result = subprocess.run(['bash', '-c', 'source channels.env && echo "$CHANNEL_CONFIGS"'], 
                               capture_output=True, text=True, cwd=os.getcwd())
         
@@ -31,7 +44,13 @@ def load_channel_config():
     except Exception as e:
         print(f"⚠️ channels.env yüklenemedi: {e}")
     
-    return {'username': '', 'password': '', 'twitter_username': ''}
+    # Final fallback: hardcoded values for testing
+    print("⚠️ Environment variables bulunamadı, test değerleri kullanılıyor...")
+    return {
+        'username': 'yusuf.ai.2025.01@gmail.com',
+        'password': '159357asd!',
+        'twitter_username': 'LofiRadioAi'
+    }
 
 def setup_driver():
     """Setup Chrome driver with human-like options"""

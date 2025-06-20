@@ -1,4 +1,3 @@
-
 package com.youtube.ai.scheduler.service;
 
 import com.youtube.ai.scheduler.model.Job;
@@ -78,16 +77,37 @@ public class JobService {
         for (String script : scripts) {
             logger.info("Running script {} for job {}", script, job.getName());
             List<String> command = new ArrayList<>();
-            command.add("bash");
-            command.add(script);
+            
+            // Detect file type and use appropriate command
+            if (script.endsWith(".py")) {
+                // For Python scripts, use bash to activate virtual environment first
+                // Extract just the filename since we're setting working directory to sh_scripts
+                String scriptFile = script.startsWith("sh_scripts/") ? script.substring("sh_scripts/".length()) : script;
+                command.add("bash");
+                command.add("-c");
+                command.add("source .venv/bin/activate && source channels.env && python3 " + scriptFile);
+            } else {
+                command.add("bash");
+                command.add(script);
+            }
+            
             if (job.getScriptParams() != null && !job.getScriptParams().isBlank()) {
                 String[] params = job.getScriptParams().split("\\s+");
                 command.addAll(Arrays.asList(params));
             }
             ProcessBuilder pb = new ProcessBuilder(command);
-            if (job.getChannel() != null) {
+            if (job.getChannel() != null && !job.getChannel().isBlank()) {
                 pb.environment().put("CHANNEL", job.getChannel());
             }
+            
+            // Add Twitter credentials as environment variables for Python scripts
+            if (script.endsWith(".py")) {
+                pb.environment().put("TWITTER_USERNAME", "yusuf.ai.2025.01@gmail.com");
+                pb.environment().put("TWITTER_PASSWORD", "159357asd!");
+                pb.environment().put("TWITTER_HANDLE", "LofiRadioAi");
+            }
+            
+            pb.directory(new File("sh_scripts"));
             pb.redirectErrorStream(true);
             Process proc = pb.start();
             try (BufferedReader reader = new BufferedReader(
@@ -179,7 +199,7 @@ public class JobService {
     public List<String> listScripts() {
         File dir = new File("sh_scripts");
         if (!dir.exists()) return Collections.emptyList();
-        String[] files = dir.list((d, name) -> name.endsWith(".sh"));
+        String[] files = dir.list((d, name) -> name.endsWith(".sh") || name.endsWith(".py"));
         if (files == null) return Collections.emptyList();
         List<String> result = new ArrayList<>();
         for (String f : files) result.add(f);

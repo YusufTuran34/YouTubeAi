@@ -8,7 +8,7 @@
     <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
-<div th:replace="fragments/navbar :: navbar"></div>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 <div class="container py-4">
     <h2>Manuel SH Çalıştır</h2>
     <form action="/jobs/manual" method="post" class="row gy-2 gx-3 align-items-end">
