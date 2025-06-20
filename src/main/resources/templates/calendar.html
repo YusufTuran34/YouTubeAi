@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <title>Haftalık Takvim</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.1/dist/flatly/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/styles.css}" />
     <style>
         table.calendar { border-collapse: collapse; width: 100%; }
-        table.calendar th, table.calendar td { border: 1px solid #ccc; padding: 0; vertical-align: top; height: 40px; }
+        table.calendar th, table.calendar td { border: 1px solid #ccc; padding:0; vertical-align: top; height: 40px; }
         table.calendar th { background: #f0f0f0; }
         td.slot { display: flex; cursor: pointer; position: relative; }
         .entry { flex: 1; margin: 1px; position: relative; border-radius: 3px; }
@@ -17,21 +18,24 @@
     </style>
 </head>
 <body>
-<h2>Haftalık Görev Takvimi</h2>
-<table class="calendar">
-    <thead>
-    <tr>
-        <th>Saat</th>
-        <th>Pzt</th>
-        <th>Sal</th>
-        <th>Çar</th>
-        <th>Per</th>
-        <th>Cum</th>
-        <th>Cmt</th>
-        <th>Paz</th>
-    </tr>
-    </thead>
-    <tbody>
+<div th:replace="fragments/navbar :: navbar"></div>
+<div class="container py-4">
+    <h2>Haftalık Görev Takvimi</h2>
+    <div class="table-responsive">
+    <table class="calendar table table-bordered">
+        <thead>
+        <tr>
+            <th>Saat</th>
+            <th>Pzt</th>
+            <th>Sal</th>
+            <th>Çar</th>
+            <th>Per</th>
+            <th>Cum</th>
+            <th>Cmt</th>
+            <th>Paz</th>
+        </tr>
+        </thead>
+        <tbody>
 <tr th:each="hour : ${#numbers.sequence(0,23)}">
     <td th:text="${hour} + ':00'"></td>
     <td th:each="day : ${#numbers.sequence(1,7)}" class="slot" th:data-day="${day}" th:data-hour="${hour}" onclick="openCell(this)">
@@ -42,20 +46,28 @@
              class="entry"></div>
     </td>
 </tr>
-    </tbody>
-</table>
-<div id="popup">
-    <form action="/jobs" method="post" id="popupForm">
-        <input type="text" name="name" placeholder="Görev Adı" required/><br/>
-        <input type="text" name="scriptPath" placeholder="Ana SH Dosyası"/><br/>
-        <input type="text" name="scriptParams" placeholder="Script Parametreleri"/><br/>
-        <input type="text" name="channel" placeholder="Kanal"/><br/>
-        <input type="text" name="cronExpression" id="cronField"/><br/>
-        <label>Aktif mi? <input type="checkbox" name="active" checked/></label><br/>
-        <input type="hidden" name="returnTo" value="/jobs/calendar"/>
-        <button type="submit">Kaydet</button>
-        <button type="button" onclick="closePopup()">Kapat</button>
-    </form>
+        </tbody>
+    </table>
+    </div>
+    <div id="popup" class="shadow">
+        <form action="/jobs" method="post" id="popupForm" class="row g-2">
+            <div class="col-12"><input type="text" name="name" placeholder="Görev Adı" required class="form-control"/></div>
+            <div class="col-12"><input type="text" name="scriptPath" placeholder="Ana SH Dosyası" class="form-control"/></div>
+            <div class="col-12"><input type="text" name="scriptParams" placeholder="Script Parametreleri" class="form-control"/></div>
+            <div class="col-12"><input type="text" name="channel" placeholder="Kanal" class="form-control"/></div>
+            <div class="col-12"><input type="text" name="cronExpression" id="cronField" class="form-control"/></div>
+            <div class="col-12 form-check">
+                <input type="checkbox" name="active" checked class="form-check-input" id="activePopup"/>
+                <label class="form-check-label" for="activePopup">Aktif mi?</label>
+            </div>
+            <input type="hidden" name="returnTo" value="/jobs/calendar"/>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+                <button type="button" onclick="closePopup()" class="btn btn-secondary">Kapat</button>
+            </div>
+        </form>
+    </div>
+    <a href="/jobs" class="btn btn-secondary mt-3">Geri</a>
 </div>
 <script th:inline="javascript">
     var startDate = new Date('[[${#temporals.format(startDate, "yyyy-MM-dd'T'HH:mm:ss")}]]');
@@ -73,6 +85,6 @@
         document.getElementById('popup').style.display='none';
     }
 </script>
-<a href="/jobs">Geri</a>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
