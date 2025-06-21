@@ -86,16 +86,25 @@ public class JobService {
                 String scriptFile = script.startsWith("sh_scripts/") ? script.substring("sh_scripts/".length()) : script;
                 command.add("bash");
                 command.add("-c");
-                // Check if virtual environment exists, otherwise use system python
-                command.add("if [ -f .venv/bin/activate ]; then source .venv/bin/activate; fi && python3 " + scriptFile);
+                // Build the complete command with parameters
+                StringBuilder pythonCommand = new StringBuilder();
+                pythonCommand.append("if [ -f .venv/bin/activate ]; then source .venv/bin/activate; fi && python3 ").append(scriptFile);
+                
+                // Add parameters to the python command
+                if (job.getScriptParams() != null && !job.getScriptParams().isBlank()) {
+                    pythonCommand.append(" ").append(job.getScriptParams());
+                }
+                
+                command.add(pythonCommand.toString());
             } else {
                 command.add("bash");
                 command.add(script);
-            }
-            
-            if (job.getScriptParams() != null && !job.getScriptParams().isBlank()) {
-                String[] params = job.getScriptParams().split("\\s+");
-                command.addAll(Arrays.asList(params));
+                
+                // Add parameters for shell scripts
+                if (job.getScriptParams() != null && !job.getScriptParams().isBlank()) {
+                    String[] params = job.getScriptParams().split("\\s+");
+                    command.addAll(Arrays.asList(params));
+                }
             }
             ProcessBuilder pb = new ProcessBuilder(command);
             if (job.getChannel() != null && !job.getChannel().isBlank()) {
