@@ -1,0 +1,167 @@
+{
+  "content_types": {
+    "lofi": {
+      "name": "LoFi Radio",
+      "description": "LoFi focus music for study, work, and relaxation",
+      "hashtags": [
+        "#LoFi",
+        "#FocusMusic",
+        "#StudyMusic",
+        "#ChillBeats",
+        "#AmbientMusic"
+      ],
+      "emojis": [
+        "🎵",
+        "📚",
+        "☕",
+        "🌙",
+        "💭"
+      ],
+      "tone": "calm and relaxing",
+      "video_related": true,
+      "prompts": {
+        "video": "Create a tweet about this LoFi video: '{VIDEO_TITLE}'. Make it engaging for study/work focus. Include relevant hashtags and emojis. Keep it under 280 characters.",
+        "general": "Create a calming LoFi tweet about focus music, study vibes, or relaxation. Make it warm and inviting. Include relevant hashtags and emojis. Keep it under 280 characters."
+      }
+    },
+    "horoscope": {
+      "name": "Daily Horoscope",
+      "description": "Daily horoscope readings and spiritual guidance",
+      "hashtags": [
+        "#Horoscope",
+        "#DailyHoroscope",
+        "#Zodiac",
+        "#Astrology",
+        "#Spiritual"
+      ],
+      "emojis": [
+        "✨",
+        "🌟",
+        "🔮",
+        "🌙",
+        "💫"
+      ],
+      "tone": "mystical and inspiring",
+      "video_related": false,
+      "requires_zodiac": true,
+      "prompts": {
+        "daily": "Create a daily horoscope tweet for {ZODIAC_SIGN}. Make it mystical, inspiring, and include a positive message for the day. Include relevant hashtags and emojis. Keep it under 280 characters."
+      }
+    },
+    "meditation": {
+      "name": "Meditation & Mindfulness",
+      "description": "Meditation tips, mindfulness practices, and spiritual guidance",
+      "hashtags": [
+        "#Meditation",
+        "#Mindfulness",
+        "#Zen",
+        "#InnerPeace",
+        "#Spiritual"
+      ],
+      "emojis": [
+        "🧘",
+        "🌸",
+        "🕉️",
+        "☮️",
+        "🌿"
+      ],
+      "tone": "peaceful and contemplative",
+      "video_related": false,
+      "prompts": {
+        "general": "Create a peaceful meditation tweet about mindfulness, inner peace, or spiritual growth. Make it calming and inspiring. Include relevant hashtags and emojis. Keep it under 280 characters."
+      }
+    },
+    "fitness": {
+      "name": "Fitness & Wellness",
+      "description": "Fitness tips, workout motivation, and health advice",
+      "hashtags": [
+        "#Fitness",
+        "#Workout",
+        "#Health",
+        "#Motivation",
+        "#Wellness"
+      ],
+      "emojis": [
+        "💪",
+        "🔥",
+        "🏃",
+        "💯",
+        "🎯"
+      ],
+      "tone": "energetic and motivational",
+      "video_related": false,
+      "prompts": {
+        "general": "Create an energetic fitness tweet about workouts, motivation, or health tips. Make it inspiring and actionable. Include relevant hashtags and emojis. Keep it under 280 characters."
+      }
+    },
+    "cooking": {
+      "name": "Cooking & Recipes",
+      "description": "Cooking tips, recipes, and food inspiration",
+      "hashtags": [
+        "#Cooking",
+        "#Recipe",
+        "#Food",
+        "#Chef",
+        "#Kitchen"
+      ],
+      "emojis": [
+        "👨‍🍳",
+        "🍳",
+        "🥘",
+        "🌶️",
+        "🍽️"
+      ],
+      "tone": "warm and inviting",
+      "video_related": false,
+      "prompts": {
+        "general": "Create a warm cooking tweet about recipes, kitchen tips, or food inspiration. Make it inviting and appetizing. Include relevant hashtags and emojis. Keep it under 280 characters."
+      }
+    },
+    "tech": {
+      "name": "Tech News",
+      "description": "Technology news and updates",
+      "hashtags": [
+        "#Tech",
+        " #Technology",
+        " #Innovation",
+        " #AI",
+        " #Future"
+      ],
+      "emojis": [
+        "💻",
+        "🚀",
+        "🔬",
+        "⚡",
+        "🌐"
+      ],
+      "tone": "informative and engaging",
+      "video_related": false,
+      "requires_zodiac": false,
+      "prompts": {
+        "general": "Create an informative tech tweet about the latest technology news, AI developments, or innovation trends. Make it engaging and shareable. Include relevant hashtags and emojis. Keep it under 280 characters."
+      }
+    }
+  },
+  "zodiac_signs": [
+    "aries",
+    "taurus",
+    "gemini",
+    "cancer",
+    "leo",
+    "virgo",
+    "libra",
+    "scorpio",
+    "sagittarius",
+    "capricorn",
+    "aquarius",
+    "pisces"
+  ],
+  "settings": {
+    "default_content_type": "lofi",
+    "default_zodiac": "aries",
+    "max_tweet_length": 280,
+    "openai_model": "gpt-3.5-turbo",
+    "max_tokens": 150,
+    "temperature": 0.8
+  }
+}
