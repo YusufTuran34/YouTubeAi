@@ -18,6 +18,7 @@ INSERT INTO job (name, script_path, script_params, channel, cron_expression, nex
   ('Daily Tweet - Meditation', 'sh_scripts/post_to_twitter_simple.py', 'meditation', 'default', '0 15 7 * * *', NULL, NULL, true, NULL, NULL, 17),
   ('Daily Tweet - Fitness', 'sh_scripts/post_to_twitter_simple.py', 'fitness', 'default', '0 45 6 * * *', NULL, NULL, true, NULL, NULL, 18),
   ('Daily Tweet - Cooking', 'sh_scripts/post_to_twitter_simple.py', 'cooking', 'default', '0 0 18 * * *', NULL, NULL, true, NULL, NULL, 19),
-  ('Daily Instagram Story', 'sh_scripts/post_instagram_story.sh', '', 'default', '0 0 11 * * *', NULL, NULL, true, NULL, NULL, 20),
-  ('Example 5m Upload', 'sh_scripts/run_pipeline_and_upload.sh', '0.083 --post-twitter', 'default', '0 0 */6 * * *', NULL, NULL, true, NULL, NULL, 21),
-  ('Example 10m Stream', 'sh_scripts/run_pipeline_and_stream.sh', '0.167 --post-twitter', 'default', '0 0 */4 * * *', NULL, NULL, true, NULL, NULL, 22);
+  ('Daily Tweet - Tech', 'sh_scripts/post_to_twitter_simple.py', 'tech', 'default', '0 0 14 * * *', NULL, NULL, true, NULL, NULL, 20),
+  ('Daily Instagram Story', 'sh_scripts/post_instagram_story.sh', '', 'default', '0 0 11 * * *', NULL, NULL, true, NULL, NULL, 21),
+  ('Example 5m Upload', 'sh_scripts/run_pipeline_and_upload.sh', '0.083 --post-twitter', 'default', '0 0 */6 * * *', NULL, NULL, true, NULL, NULL, 22),
+  ('Example 10m Stream', 'sh_scripts/run_pipeline_and_stream.sh', '0.167 --post-twitter', 'default', '0 0 */4 * * *', NULL, NULL, true, NULL, NULL, 23);
