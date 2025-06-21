@@ -59,7 +59,11 @@ if [ "$RUN_UPLOAD" -eq 1 ]; then
 fi
 
 if [ "$POST_TWITTER" -eq 1 ]; then
-    bash "$SCRIPT_DIR/post_to_twitter.sh" "$CONFIG_OVERRIDE"
+    if [ -n "$CONFIG_OVERRIDE" ]; then
+        bash "$SCRIPT_DIR/post_to_twitter.sh" --config "$CONFIG_OVERRIDE"
+    else
+        bash "$SCRIPT_DIR/post_to_twitter.sh"
+    fi
 fi
 
 if [ "$POST_INSTAGRAM" -eq 1 ]; then
