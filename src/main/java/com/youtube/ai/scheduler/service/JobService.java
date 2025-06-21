@@ -30,12 +30,14 @@ public class JobService {
     private final JobRepository jobRepository;
     private final TaskScheduler scheduler;
     private final JobRunRepository jobRunRepository;
+    // private final LogWebSocketHandler logWebSocketHandler;
     private final Map<Long, ScheduledFuture<?>> scheduledTasks = new HashMap<>();
     private final Map<Long, StringBuilder> runningLogs = new ConcurrentHashMap<>();
 
     public JobService(JobRepository jobRepository, JobRunRepository jobRunRepository) {
         this.jobRepository = jobRepository;
         this.jobRunRepository = jobRunRepository;
+        // this.logWebSocketHandler = logWebSocketHandler;
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.initialize();
         this.scheduler = taskScheduler;
@@ -81,11 +83,11 @@ public class JobService {
             // Detect file type and use appropriate command
             if (script.endsWith(".py")) {
                 // For Python scripts, use bash to activate virtual environment first
-                // Extract just the filename since we're setting working directory to sh_scripts
                 String scriptFile = script.startsWith("sh_scripts/") ? script.substring("sh_scripts/".length()) : script;
                 command.add("bash");
                 command.add("-c");
-                command.add("source .venv/bin/activate && source channels.env && python3 " + scriptFile);
+                // Check if virtual environment exists, otherwise use system python
+                command.add("if [ -f .venv/bin/activate ]; then source .venv/bin/activate; fi && python3 " + scriptFile);
             } else {
                 command.add("bash");
                 command.add(script);
@@ -117,6 +119,10 @@ public class JobService {
                     String prefixed = "[JOB-" + job.getId() + "] " + line;
                     System.out.println(prefixed);
                     logBuilder.append(prefixed).append("\n");
+                    
+                    // Real-time WebSocket broadcast (temporarily disabled)
+                    // logWebSocketHandler.broadcastToJob(job.getId(), prefixed);
+                    
                     StringBuilder live = runningLogs.get(job.getId());
                     if (live != null) {
                         live.append(prefixed).append("\n");

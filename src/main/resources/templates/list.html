@@ -5,6 +5,7 @@
     <title>Job List</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.1/dist/flatly/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/styles.css}" />
 </head>
 <body>
@@ -38,7 +39,12 @@
                     <a th:href="@{'/jobs/run/' + ${job.id}}" class="btn btn-sm btn-primary">Çalıştır</a>
                     <a th:href="@{'/jobs/delete/' + ${job.id}}" class="btn btn-sm btn-danger">Sil</a>
                 </td>
-                <td><a th:href="@{'/jobs/logs/' + ${job.id}}" class="btn btn-sm btn-outline-secondary">Görüntüle</a></td>
+                <td>
+                    <a th:href="@{'/jobs/logs/' + ${job.id}}" class="btn btn-sm btn-outline-secondary">Görüntüle</a>
+                    <a th:href="@{'/logs/realtime/' + ${job.id}}" class="btn btn-sm btn-info" target="_blank" title="Real-Time Logs">
+                        <i class="fas fa-terminal"></i> Live
+                    </a>
+                </td>
             </tr>
             </tbody>
         </table>

@@ -12,6 +12,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
+import uuid
+
+# Performance optimizations
+FAST_MODE = True  # Enable speed optimizations
+HEADLESS_MODE = os.getenv('HEADLESS', 'false').lower() == 'true'
+REUSE_PROFILE = True  # Reuse Chrome profile for faster login
 
 def load_content_config():
     """Load content configuration from JSON file"""
@@ -67,22 +73,29 @@ def load_channel_config():
             print(f"✅ Environment variables'den yüklendi: {username}")
             return username, password, handle
         
-        # Fallback to channels.env file
+        # Fallback to channels.env file (JSON format)
         if os.path.exists('channels.env'):
-            with open('channels.env', 'r') as f:
-                for line in f:
-                    if line.strip() and not line.startswith('#'):
-                        key, value = line.strip().split('=', 1)
-                        if key == 'TWITTER_USERNAME':
-                            username = value.strip('"')
-                        elif key == 'TWITTER_PASSWORD':
-                            password = value.strip('"')
-                        elif key == 'TWITTER_HANDLE':
-                            handle = value.strip('"')
-            
-            if username and password:
-                print(f"✅ channels.env'den yüklendi: {username}")
-                return username, password, handle
+            try:
+                with open('channels.env', 'r') as f:
+                    content = f.read()
+                    # Extract JSON from the export statement
+                    if 'CHANNEL_CONFIGS=' in content:
+                        json_start = content.find("'[")
+                        json_end = content.rfind("]'")
+                        if json_start != -1 and json_end != -1:
+                            json_str = content[json_start+1:json_end+1]
+                            config = json.loads(json_str)
+                            if config and len(config) > 0:
+                                twitter_config = config[0].get('twitter', {})
+                                username = twitter_config.get('USERNAME', '')
+                                password = twitter_config.get('PASSWORD', '')
+                                handle = twitter_config.get('TWITTER_USERNAME', '')
+                                
+                                if username and password:
+                                    print(f"✅ channels.env'den yüklendi: {username}")
+                                    return username, password, handle
+            except Exception as e:
+                print(f"⚠️ channels.env parse error: {e}")
         
         # Final fallback to test credentials
         print("⚠️ Using test credentials")
@@ -133,7 +146,7 @@ def generate_tweet(content_type="lofi", zodiac_sign="aries"):
 
 def main():
     print("🐦 TWITTER SIMPLE SELENIUM POST BAŞLATILIYOR")
-    print("=" * 50)
+    print("==================================================")
     
     # Load content configuration
     content_config = load_content_config()
@@ -177,19 +190,59 @@ def main():
     
     print("📤 Tweet gönderiliyor...")
     
-    # Setup Chrome options
+    # Setup Chrome options with performance optimizations
     chrome_options = Options()
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
+    
+    # Performance optimizations for speed
+    if FAST_MODE:
+        print("🚀 HIZLI MOD aktif - Performance optimizasyonları uygulanıyor...")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-background-timer-throttling")
+        chrome_options.add_argument("--disable-renderer-backgrounding")
+        chrome_options.add_argument("--disable-features=TranslateUI")
+        chrome_options.add_argument("--disable-ipc-flooding-protection")
+        chrome_options.add_argument("--no-first-run")
+        chrome_options.add_argument("--disable-default-apps")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--disable-plugins")
+        chrome_options.add_argument("--disable-images")  # Don't load images for speed
+        chrome_options.page_load_strategy = 'eager'  # Don't wait for all resources
+    else:
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+    
+    # Headless mode if requested  
+    if HEADLESS_MODE:
+        chrome_options.add_argument("--headless")
+        print("👻 Headless mode aktif!")
+        
+    # Reuse profile for faster login
+    if REUSE_PROFILE:
+        profile_path = os.path.expanduser("~/.chrome_twitter_profile")
+        chrome_options.add_argument(f"--user-data-dir={profile_path}")
+        print("🔄 Profile yeniden kullanılıyor (hızlı login)...")
+    
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
     chrome_options.add_experimental_option('useAutomationExtension', False)
+    chrome_options.add_argument("--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
     
-    # Initialize driver
-    print("🔧 Chrome driver başlatılıyor (normal mod)...")
+    # Initialize driver with timing
+    mode_text = "HIZLI MOD" if FAST_MODE else "normal mod"
+    print(f"🔧 Chrome driver başlatılıyor ({mode_text})...")
+    start_time = time.time()
     driver = webdriver.Chrome(options=chrome_options)
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-    print("✅ Chrome driver başlatıldı (kalıcı oturum)!")
+    
+    # Set faster timeouts for speed
+    if FAST_MODE:
+        driver.implicitly_wait(3)  # Reduced from default 10
+        driver.set_page_load_timeout(10)  # Reduced from default 30
+    
+    setup_time = time.time() - start_time
+    print(f"✅ Chrome driver başlatıldı! Süre: {setup_time:.1f}s")
     
     try:
         # Login process
@@ -259,9 +312,13 @@ def main():
         
         # Enter tweet text
         print("📝 Tweet metni giriliyor...")
+        # Clean tweet text to handle BMP character issues
+        clean_tweet = tweet_text.encode('ascii', 'ignore').decode('ascii')
+        if len(clean_tweet) < len(tweet_text):
+            print(f"⚠️ Non-ASCII karakterler temizlendi: {len(tweet_text)} -> {len(clean_tweet)}")
         tweet_textarea.clear()
-        tweet_textarea.send_keys(tweet_text)
-        print(f"📝 Girilen metin: {tweet_text}")
+        tweet_textarea.send_keys(clean_tweet)
+        print(f"📝 Girilen metin: {clean_tweet}")
         
         # Find and click tweet button
         print("🚀 Tweet butonu aranıyor...")
@@ -271,7 +328,8 @@ def main():
         print("✅ Tweet butonu bulundu: [data-testid=\"tweetButtonInline\"]")
         
         print("🚀 Tweet gönderiliyor...")
-        tweet_button.click()
+        # Use JavaScript click to avoid interception
+        driver.execute_script("arguments[0].click();", tweet_button)
         
         print("✅ Tweet başarıyla gönderildi!")
         time.sleep(20)
