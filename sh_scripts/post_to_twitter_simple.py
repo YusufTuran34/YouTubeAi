@@ -112,6 +112,21 @@ def load_channel_config():
         print(f"❌ Configuration loading error: {e}")
         return None, None, None
 
+def get_latest_video_url():
+    """Get the latest video URL from file"""
+    try:
+        if os.path.exists('latest_video_url.txt'):
+            with open('latest_video_url.txt', 'r') as f:
+                url = f.read().strip()
+                if url:
+                    print(f"📹 Video URL bulundu: {url}")
+                    return url
+        print("⚠️ Video URL bulunamadı")
+        return None
+    except Exception as e:
+        print(f"❌ Video URL okuma hatası: {e}")
+        return None
+
 def generate_tweet(content_type="lofi", zodiac_sign="aries"):
     """Generate tweet using the advanced script"""
     try:
@@ -128,6 +143,17 @@ def generate_tweet(content_type="lofi", zodiac_sign="aries"):
             if os.path.exists('generated_tweet.txt'):
                 with open('generated_tweet.txt', 'r') as f:
                     tweet_text = f.read().strip()
+                
+                # Check if we have a video URL to append
+                video_url = get_latest_video_url()
+                if video_url:
+                    # Add video URL to tweet if there's space
+                    url_text = f"\n\n🎥 Watch: {video_url}"
+                    if len(tweet_text) + len(url_text) <= 280:
+                        tweet_text += url_text
+                        print("📹 Video URL tweet'e eklendi")
+                    else:
+                        print("⚠️ Tweet çok uzun, video URL eklenmedi")
                 
                 # Read content type for logging
                 content_type_used = content_type

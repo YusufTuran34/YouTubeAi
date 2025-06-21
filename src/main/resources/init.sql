@@ -17,5 +17,5 @@ INSERT INTO job (name, script_path, script_params, channel, cron_expression, nex
   ('Daily Tweet - Horoscope Pisces', 'sh_scripts/post_to_twitter_simple.py', 'horoscope pisces', 'default', '0 45 11 * * *', NULL, NULL, true, NULL, NULL, 16),
   ('Daily Tweet - Meditation', 'sh_scripts/post_to_twitter_simple.py', 'meditation', 'default', '0 15 7 * * *', NULL, NULL, true, NULL, NULL, 17),
   ('Daily Instagram Story', 'sh_scripts/post_instagram_story.sh', '', 'default', '0 0 11 * * *', NULL, NULL, true, NULL, NULL, 18),
-  ('Example 5m Upload', 'sh_scripts/run_pipeline_and_upload.sh', '0.083 --post-twitter', 'default', '0 0 */6 * * *', NULL, NULL, true, NULL, NULL, 19),
-  ('Example 10m Stream', 'sh_scripts/run_pipeline_and_stream.sh', '0.167 --post-twitter', 'default', '0 0 */4 * * *', NULL, NULL, true, NULL, NULL, 20);
+  ('Example 5m Upload', 'sh_scripts/run_pipeline_and_upload.sh', '0.083 --tag lofi --post-twitter', 'default', '0 0 */6 * * *', NULL, NULL, true, NULL, NULL, 19),
+  ('Example 10m Stream', 'sh_scripts/run_pipeline_and_stream.sh', '0.167 --tag lofi --post-twitter', 'default', '0 0 */4 * * *', NULL, NULL, true, NULL, NULL, 20);

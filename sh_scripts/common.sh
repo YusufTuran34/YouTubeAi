@@ -38,6 +38,8 @@ load_channel_config() {
                 instagram.USERNAME) export INSTAGRAM_USERNAME="$value" ;;
                 instagram.PASSWORD) export INSTAGRAM_PASSWORD="$value" ;;
 
+                openai.API_KEY) export OPENAI_API_KEY="$value" ;;
+
                 *)
                   key=$(echo "$path" | tr '.-' '_')
                   export "$key"="$value"
@@ -60,12 +62,6 @@ load_channel_config() {
     echo "[DEBUG] Override config yükleniyor: $override"
     . "$override"
   fi
-}
-
-# Load Twitter credentials from channels.env
-load_twitter_credentials() {
-    export $(grep -o 'API_KEY".*' channels.env | head -1 | sed 's/.*API_KEY": "\([^"]*\)".*/TWITTER_API_KEY=\1/')
-    export $(grep -o 'API_SECRET".*' channels.env | head -1 | sed 's/.*API_SECRET": "\([^"]*\)".*/TWITTER_API_SECRET=\1/')
 }
 
 # Get tweet message from generated_title.txt and generated_description.txt

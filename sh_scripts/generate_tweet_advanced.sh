@@ -1,12 +1,25 @@
 #!/bin/bash
 # generate_tweet_advanced.sh - Advanced tweet generation with JSON configuration
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Set PATH to ensure commands work
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH"
+
+SCRIPT_DIR="/Users/yusuf-mini/Downloads/YouTubeAi/sh_scripts"
 CONTENT_TYPE="${1:-lofi}"  # Default content type
 ZODIAC_SIGN="${2:-aries}"  # Default zodiac sign for horoscope
 CONFIG_OVERRIDE="${3:-}"
-source "$SCRIPT_DIR/common.sh"
-load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
+
+# Load channel configuration to get OpenAI API key
+if [ -f "$SCRIPT_DIR/common.sh" ]; then
+    source "$SCRIPT_DIR/common.sh" 2>/dev/null || true
+    load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE" 2>/dev/null || true
+fi
+
+# Check if OpenAI API key is loaded
+if [ -z "$OPENAI_API_KEY" ]; then
+    echo "❌ OpenAI API key not found in configuration"
+    exit 1
+fi
 
 # JSON configuration file path
 CONFIG_FILE="$SCRIPT_DIR/content_configs.json"
@@ -56,7 +69,7 @@ if [[ "$VIDEO_RELATED" == "true" ]]; then
     if [[ -f "$SCRIPT_DIR/latest_video_url.txt" ]]; then
         VIDEO_URL=$(cat "$SCRIPT_DIR/latest_video_url.txt" | head -1)
         if [[ -f "$SCRIPT_DIR/generated_title.txt" ]]; then
-            VIDEO_TITLE=$(cat "$SCRIPT_DIR/generated_title.txt" | head -1)
+            VIDEO_TITLE=$(cat "$SCRIPT_DIR/generated_title.txt" | head -1 | tr -d '"')
         fi
     fi
 fi
@@ -73,7 +86,6 @@ fi
 
 # Get prompt from JSON
 PROMPT=$(jq -r ".content_types.$CONTENT_TYPE.prompts.$PROMPT_KEY" "$CONFIG_FILE")
-
 # Replace placeholders in prompt
 if [[ "$VIDEO_RELATED" == "true" && -n "$VIDEO_TITLE" ]]; then
     PROMPT=$(echo "$PROMPT" | sed "s/{VIDEO_TITLE}/$VIDEO_TITLE/g")
@@ -91,24 +103,32 @@ MAX_LENGTH=$(jq -r '.settings.max_tweet_length' "$CONFIG_FILE")
 
 # Generate tweet using ChatGPT
 echo "🤖 Generating tweet with ChatGPT..."
-TWEET_TEXT=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
+
+# Create JSON payload
+JSON_PAYLOAD="{
+  \"model\": \"$OPENAI_MODEL\",
+  \"messages\": [
+    {
+      \"role\": \"system\",
+      \"content\": \"You are a social media expert. Create engaging, authentic tweets that match the specified tone and style.\"
+    },
+    {
+      \"role\": \"user\",
+      \"content\": \"$PROMPT\"
+    }
+  ],
+  \"max_tokens\": $MAX_TOKENS,
+  \"temperature\": $TEMPERATURE
+}"
+
+# Make API call
+API_RESPONSE=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
   -H "Authorization: Bearer $OPENAI_API_KEY" \
   -H "Content-Type: application/json" \
-  -d "{
-    \"model\": \"$OPENAI_MODEL\",
-    \"messages\": [
-      {
-        \"role\": \"system\",
-        \"content\": \"You are a social media expert. Create engaging, authentic tweets that match the specified tone and style.\"
-      },
-      {
-        \"role\": \"user\",
-        \"content\": \"$PROMPT\"
-      }
-    ],
-    \"max_tokens\": $MAX_TOKENS,
-    \"temperature\": $TEMPERATURE
-  }" | jq -r '.choices[0].message.content' | tr -d '\n')
+  -d "$JSON_PAYLOAD")
+
+# Extract tweet text
+TWEET_TEXT=$(echo "$API_RESPONSE" | jq -r '.choices[0].message.content' | tr -d '\n')
 
 # Clean up the tweet text
 TWEET_TEXT=$(echo "$TWEET_TEXT" | sed 's/^"//;s/"$//' | sed 's/^Tweet: //' | sed 's/^Here.*://')

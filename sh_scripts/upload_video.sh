@@ -251,30 +251,5 @@ fi
 
 echo "✅ Video yüklendi! YouTube Link: https://youtu.be/$VIDEO_ID"
 
-# --post-twitter flag kontrolü
-POST_TWITTER=false
-for arg in "$@"; do
-  if [ "$arg" = "--post-twitter" ]; then
-    POST_TWITTER=true
-    break
-  fi
-done
-
-# Sadece --post-twitter flag'i varsa tweet at
-if [ "$POST_TWITTER" = true ]; then
-  echo "📢 Video yüklendi, Twitter'a otomatik tweet atılıyor..."
-  
-  # Video URL'ini dosyaya kaydet
-  echo "https://youtu.be/$VIDEO_ID" > "$SCRIPT_DIR/latest_video_url.txt"
-  
-  # Selenium script ile tweet at
-  cd "$SCRIPT_DIR"
-  source .venv/bin/activate
-  python3 post_to_twitter_simple.py
-  
-  if [ $? -eq 0 ]; then
-    echo "✅ Twitter tweet başarıyla gönderildi!"
-  else
-    echo "❌ Twitter tweet gönderilemedi!"
-  fi
-fi
+# Video URL'ini dosyaya kaydet (her zaman)
+echo "https://youtu.be/$VIDEO_ID" > "$SCRIPT_DIR/latest_video_url.txt"

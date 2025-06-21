@@ -80,10 +80,12 @@ public class JobService {
             logger.info("Running script {} for job {}", script, job.getName());
             List<String> command = new ArrayList<>();
             
+            // Remove sh_scripts/ prefix if present since we're running from sh_scripts directory
+            String scriptFile = script.startsWith("sh_scripts/") ? script.substring("sh_scripts/".length()) : script;
+            
             // Detect file type and use appropriate command
             if (script.endsWith(".py")) {
                 // For Python scripts, use bash to activate virtual environment first
-                String scriptFile = script.startsWith("sh_scripts/") ? script.substring("sh_scripts/".length()) : script;
                 command.add("bash");
                 command.add("-c");
                 // Build the complete command with parameters
@@ -98,7 +100,7 @@ public class JobService {
                 command.add(pythonCommand.toString());
             } else {
                 command.add("bash");
-                command.add(script);
+                command.add(scriptFile);
                 
                 // Add parameters for shell scripts
                 if (job.getScriptParams() != null && !job.getScriptParams().isBlank()) {

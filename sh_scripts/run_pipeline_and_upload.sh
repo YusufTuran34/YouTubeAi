@@ -55,11 +55,26 @@ if [ "$RUN_UPLOAD" -eq 1 ]; then
     VIDEO_URL=$(echo "$UPLOAD_OUTPUT" | grep -o 'https://youtu.be/[A-Za-z0-9_-]*')
     if [ -n "$VIDEO_URL" ]; then
         echo "$VIDEO_URL" > "$SCRIPT_DIR/latest_video_url.txt"
+        
+        # Video upload başarılı olduysa Twitter'a post et
+        if [ "$POST_TWITTER" -eq 1 ]; then
+            echo "📢 Video yüklendi, Twitter'a otomatik tweet atılıyor..."
+            
+            # Selenium script ile tweet at - TAG parametresini geç
+            cd "$SCRIPT_DIR"
+            source .venv/bin/activate
+            
+            # TAG parametresine göre content type belirle
+            CONTENT_TYPE="${TAG:-lofi}"
+            python3 post_to_twitter_simple.py "$CONTENT_TYPE"
+            
+            if [ $? -eq 0 ]; then
+                echo "✅ Twitter tweet başarıyla gönderildi!"
+            else
+                echo "❌ Twitter tweet gönderilemedi!"
+            fi
+        fi
     fi
-fi
-
-if [ "$POST_TWITTER" -eq 1 ]; then
-    bash "$SCRIPT_DIR/post_to_twitter.sh" "$CONFIG_OVERRIDE"
 fi
 
 if [ "$POST_INSTAGRAM" -eq 1 ]; then
