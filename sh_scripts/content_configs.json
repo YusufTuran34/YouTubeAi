@@ -169,8 +169,8 @@
     "runway": {
       "enabled": true,
       "model": "gen3a_turbo",
-      "duration": 10,
-      "ratio": "16:9",
+      "duration": 5,
+      "ratio": "1280:768",
       "watermark": false,
       "api_base_url": "https://api.dev.runwayml.com/v1"
     }

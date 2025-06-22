@@ -111,17 +111,22 @@ if [[ "$USE_RUNWAY_API" == "true" && -n "$RUNWAY_API_KEY" ]]; then
     else
         echo "✅ Base image generated: ${BASE_IMAGE_URL:0:50}..."
         
+        # Load runway settings from JSON config
+        RUNWAY_MODEL=$(jq -r '.video_generation.runway.model' "$CONFIG_FILE")
+        RUNWAY_DURATION=$(jq -r '.video_generation.runway.duration' "$CONFIG_FILE")
+        RUNWAY_RATIO=$(jq -r '.video_generation.runway.ratio' "$CONFIG_FILE")
+        
         # Call Runway API for image-to-video generation (CORRECTED)
         RUNWAY_RESPONSE=$(curl -s -X POST "https://api.dev.runwayml.com/v1/image_to_video" \
           -H "Authorization: Bearer $RUNWAY_API_KEY" \
           -H "Content-Type: application/json" \
           -H "X-Runway-Version: 2024-11-06" \
           -d "{
-            \"model\": \"gen3a_turbo\",
+            \"model\": \"$RUNWAY_MODEL\",
             \"promptImage\": \"$BASE_IMAGE_URL\",
             \"promptText\": \"$RUNWAY_PROMPT\",
-            \"duration\": 5,
-            \"ratio\": \"1280:768\"
+            \"duration\": $RUNWAY_DURATION,
+            \"ratio\": \"$RUNWAY_RATIO\"
           }")
     fi
     
@@ -140,6 +145,7 @@ if [[ "$USE_RUNWAY_API" == "true" && -n "$RUNWAY_API_KEY" ]]; then
         for i in {1..30}; do
             sleep 3
             STATUS_RESPONSE=$(curl -s -H "Authorization: Bearer $RUNWAY_API_KEY" \
+                -H "X-Runway-Version: 2024-11-06" \
                 "https://api.dev.runwayml.com/v1/tasks/$TASK_ID")
             
             STATUS=$(echo "$STATUS_RESPONSE" | jq -r '.status')
