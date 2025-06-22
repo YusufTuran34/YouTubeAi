@@ -20,12 +20,12 @@ DURATION_INT=${DURATION%.*}
 
 TITLE=""
 if [ -n "$OPENAI_API_KEY" ] && command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-    PROMPT="Create a short, catchy and SEO friendly YouTube title for a lofi focus music video. Duration: ${DURATION_INT} seconds. Keywords: ${KEYWORDS}. Respond only with the title text."
+    PROMPT="Create a short, catchy and SEO friendly YouTube title for a lofi focus music video. Duration: ${DURATION_INT} seconds. Keywords: ${KEYWORDS}. Respond only with the title text, no quotes."
     RESPONSE=$(curl -s https://api.openai.com/v1/chat/completions \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $OPENAI_API_KEY" \
-        -d "{\"model\":\"${OPENAI_MODEL:-gpt-3.5-turbo}\",\"messages\":[{\"role\":\"user\",\"content\":\"$PROMPT\"}],\"max_tokens\":20}")
-    TITLE=$(echo "$RESPONSE" | jq -r '.choices[0].message.content' | tr -d '\r')
+        -d "{\"model\":\"${OPENAI_MODEL:-gpt-3.5-turbo}\",\"messages\":[{\"role\":\"user\",\"content\":\"$PROMPT\"}],\"max_tokens\":50}")
+    TITLE=$(echo "$RESPONSE" | jq -r '.choices[0].message.content' | tr -d '\r\n"')
 fi
 
 if [ -z "$TITLE" ] || [ "$TITLE" = "null" ]; then
