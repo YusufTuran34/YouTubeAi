@@ -6,10 +6,12 @@
 
 ### 📋 Ana Özellikler
 - **Otomatik Tweet Üretimi**: OpenAI API kullanarak içerik tipine göre tweet üretimi
+- **🎬 AI Video Background Generation**: ChatGPT + DALL-E ile configuratif video background üretimi
 - **Selenium Twitter Entegrasyonu**: Otomatik tweet gönderimi
-- **İçerik Yönetimi**: LoFi müzik ve horoscope içerikleri
+- **İçerik Yönetimi**: LoFi müzik, meditation ve horoscope içerikleri
 - **Zamanlanmış İş Yönetimi**: Spring Boot ile job scheduling
 - **Multi-Channel Support**: Farklı kanallar için ayrı konfigürasyonlar
+- **Configuratif Tag Sistemi**: JSON tabanlı esnek yapılandırma
 
 ## 🏗️ Teknik Mimari
 
@@ -49,9 +51,12 @@ src/main/resources/templates/
 sh_scripts/
 ├── post_to_twitter_simple.py         # Ana Twitter posting scripti
 ├── generate_tweet_advanced.sh        # OpenAI tweet üretimi
+├── generate_ai_video_background.sh   # 🆕 AI video background generation
+├── generate_video.sh                 # Ana video generation (güncellenmiş)
 ├── common.sh                          # Ortak fonksiyonlar
 ├── auto_cleanup.sh                    # Sistem temizliği
 ├── quick_test.sh                      # Hızlı test sistemi
+├── content_configs.json               # 🆕 Configuratif sistem
 └── configs/
     └── base.conf                      # Temel konfigürasyon
 ```
@@ -132,17 +137,71 @@ CREATE TABLE job_runs (
 );
 ```
 
+## 🎬 AI Video Generation Sistemi
+
+### Yeni Configuratif Video Generation
+**YouTubeAI** artık ChatGPT + DALL-E entegrasyonu ile content type'a göre otomatik video background üretimi yapabilir.
+
+#### Çalışma Prensibi:
+1. **Content Type Detection**: JSON config'den content type'ı alır
+2. **ChatGPT Prompt Generation**: Visual tag'lere göre detaylı frame açıklamaları üretir
+3. **DALL-E Image Generation**: Her frame için high-quality görsel oluşturur
+4. **Animation Creation**: FFmpeg ile frame'leri birleştirip GIF/MP4 yapar
+5. **Fallback System**: AI başarısız olursa Google Drive'dan fallback
+
+#### Desteklenen Content Types:
+- **LoFi**: Cozy study scenes, warm lighting, coffee, books
+- **Meditation**: Zen garden, lotus flowers, bamboo, peaceful nature  
+- **Horoscope**: Mystical cosmic scenes, galaxies, spiritual symbols
+
+#### Konfigürasyon:
+```json
+{
+  "content_types": {
+    "lofi": {
+      "video_generation": {
+        "visual_tags": ["lofi", "study", "cozy", "coffee"],
+        "background_prompt": "Detailed DALL-E prompt",
+        "animation_style": "smooth",
+        "color_palette": "warm, muted colors",
+        "mood": "peaceful and productive"
+      }
+    }
+  },
+  "video_generation": {
+    "enabled": true,
+    "use_ai_generation": true,
+    "ai_model": "dall-e-3",
+    "frame_count": 4,
+    "output_format": "gif"
+  }
+}
+```
+
 ## 🔍 Önemli Dosyalar ve İşlevleri
 
-### 1. post_to_twitter_simple.py
+### 1. generate_ai_video_background.sh (YENİ)
+- **Ana Fonksiyon**: Content type'a göre AI ile video background üretimi
+- **ChatGPT Integration**: Frame açıklamaları için GPT-4 kullanımı
+- **DALL-E Integration**: High-quality görsel üretimi
+- **Configuratif System**: JSON config'den ayarları okuma
+- **Fallback Mechanism**: FFmpeg yoksa PNG, AI başarısız olursa Google Drive
+
+### 2. post_to_twitter_simple.py
 - **Ana Fonksiyon**: Twitter'a otomatik tweet gönderimi
 - **Selenium Entegrasyonu**: Chrome WebDriver kullanımı
 - **Anti-Detection**: Kullanıcı davranışı simülasyonu
 - **Profile Management**: Geçici Chrome profilleri
 
-### 2. generate_tweet_advanced.sh
+### 3. generate_video.sh (GÜNCELLENDİ)
+- **AI Video Generation Integration**: Yeni configuratif sistemi kullanır
+- **Content Type Support**: TAG parametresi ile content type belirleme
+- **Fallback Chain**: AI → Legacy OpenAI GIF → Google Drive
+- **Improved Error Handling**: Daha güçlü hata yönetimi
+
+### 4. generate_tweet_advanced.sh
 - **OpenAI Entegrasyonu**: GPT modeli ile tweet üretimi
-- **Content Type Handling**: LoFi ve Horoscope ayrımı
+- **Content Type Handling**: LoFi, Meditation ve Horoscope ayrımı
 - **JSON Processing**: API yanıtlarını işleme
 - **Error Handling**: API hata yönetimi
 

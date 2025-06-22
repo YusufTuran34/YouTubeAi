@@ -1,13 +1,15 @@
 # Content Configuration System
 
-Bu sistem, tweet içerik türlerini ve prompt'larını JSON formatında yönetmenizi sağlar. Artık yeni kategoriler eklemek veya mevcut olanları düzenlemek için benden yardım istemenize gerek yok!
+Bu sistem, tweet içerik türlerini, prompt'larını ve **AI video generation ayarlarını** JSON formatında yönetmenizi sağlar. Artık yeni kategoriler eklemek, video background'larını customize etmek veya mevcut olanları düzenlemek için benden yardım istemenize gerek yok!
 
 ## 📁 Dosya Yapısı
 
-- `content_configs.json` - Ana konfigürasyon dosyası
+- `content_configs.json` - Ana konfigürasyon dosyası (tweet + video generation)
 - `manage_content_configs.sh` - Konfigürasyon yönetim aracı
 - `generate_tweet_advanced.sh` - JSON konfigürasyonunu kullanan tweet üretim script'i
 - `post_to_twitter_simple.py` - JSON konfigürasyonunu kullanan Python script'i
+- `generate_ai_video_background.sh` - **YENİ**: ChatGPT + DALL-E ile video background üretimi
+- `generate_video.sh` - Ana video generation script'i (güncellenmiş)
 
 ## 🚀 Hızlı Başlangıç
 
@@ -194,4 +196,49 @@ sudo apt-get install jq
 ./manage_content_configs.sh validate
 ```
 
-Bu sistem sayesinde artık tweet içerik türlerinizi tamamen bağımsız olarak yönetebilirsiniz! 🎉 
+## 🎬 AI Video Generation Sistemi
+
+### Hızlı Kullanım
+```bash
+# Content type'a göre AI video background üret
+./generate_ai_video_background.sh lofi
+./generate_ai_video_background.sh meditation  
+./generate_ai_video_background.sh horoscope
+
+# Ana video generation sistemini çalıştır
+export TAG=lofi
+./generate_video.sh
+```
+
+### Video Generation Ayarları
+Her content type için özel video generation ayarları bulunur:
+
+```json
+"video_generation": {
+  "visual_tags": ["tag1", "tag2"],        // ChatGPT için visual keywords
+  "background_prompt": "Detaylı prompt",  // DALL-E için base prompt  
+  "animation_style": "smooth",            // Animasyon stili
+  "color_palette": "warm colors",         // Renk paleti
+  "mood": "peaceful"                      // Genel atmosfer
+}
+```
+
+### Global Video Settings
+```json
+"video_generation": {
+  "enabled": true,                        // Video generation aktif mi?
+  "use_ai_generation": true,              // AI üretimi kullansın mı?
+  "fallback_to_google_drive": true,       // Fallback olarak Google Drive
+  "ai_model": "dall-e-3",                // DALL-E model versiyonu
+  "frame_count": 4,                       // Kaç frame üretilsin
+  "output_format": "gif"                  // Çıkış formatı (gif/mp4)
+}
+```
+
+### Çalışma Prensibi
+1. 🤖 **ChatGPT**: Content type'a göre frame açıklamaları üretir
+2. 🎨 **DALL-E 3**: Her frame için high-quality görsel oluşturur  
+3. 🎬 **FFmpeg**: Frame'leri birleştirip GIF/MP4 yapar
+4. 📁 **Fallback**: AI başarısız olursa Google Drive'dan dosya alır
+
+Bu sistem sayesinde artık tweet içerik türlerinizi ve video background'larınızı tamamen bağımsız olarak yönetebilirsiniz! 🎉 

@@ -22,6 +22,24 @@
       "prompts": {
         "video": "Create a tweet about this LoFi video: '{VIDEO_TITLE}'. Make it engaging for study/work focus. Include relevant hashtags and emojis. Keep it under 280 characters.",
         "general": "Create a calming LoFi tweet about focus music, study vibes, or relaxation. Make it warm and inviting. Include relevant hashtags and emojis. Keep it under 280 characters."
+      },
+      "video_generation": {
+        "visual_tags": [
+          "lofi",
+          "study",
+          "cozy",
+          "night",
+          "city",
+          "coffee",
+          "books",
+          "relaxing",
+          "aesthetic",
+          "vintage"
+        ],
+        "background_prompt": "Create a cozy lofi study scene with warm lighting, books, coffee, and a peaceful nighttime city view. Style should be aesthetic, calming, and perfect for studying or working.",
+        "animation_style": "smooth",
+        "color_palette": "warm, muted colors with soft lighting",
+        "mood": "peaceful and productive"
       }
     },
     "horoscope": {
@@ -46,6 +64,23 @@
       "requires_zodiac": true,
       "prompts": {
         "daily": "Create a daily horoscope tweet for {ZODIAC_SIGN}. Make it mystical, inspiring, and include a positive message for the day. Include relevant hashtags and emojis. Keep it under 280 characters."
+      },
+      "video_generation": {
+        "visual_tags": [
+          "mystical",
+          "cosmic",
+          "stars",
+          "galaxy",
+          "crystals",
+          "spiritual",
+          "magical",
+          "celestial",
+          "ethereal"
+        ],
+        "background_prompt": "Create a mystical cosmic scene with swirling galaxies, twinkling stars, and magical ethereal elements. Include spiritual symbols and celestial beauty with deep space colors.",
+        "animation_style": "flowing",
+        "color_palette": "deep purples, blues, golds with mystical lighting",
+        "mood": "mystical and inspiring"
       }
     },
     "meditation": {
@@ -69,6 +104,23 @@
       "video_related": false,
       "prompts": {
         "general": "Create a peaceful meditation tweet about mindfulness, inner peace, or spiritual growth. Make it calming and inspiring. Include relevant hashtags and emojis. Keep it under 280 characters."
+      },
+      "video_generation": {
+        "visual_tags": [
+          "zen",
+          "nature",
+          "water",
+          "lotus",
+          "bamboo",
+          "peaceful",
+          "serene",
+          "minimalist",
+          "calming"
+        ],
+        "background_prompt": "Create a serene zen garden scene with flowing water, lotus flowers, bamboo, and natural elements. Style should be minimalist, peaceful, and perfect for meditation.",
+        "animation_style": "gentle",
+        "color_palette": "natural greens, soft whites, earth tones",
+        "mood": "zen and tranquil"
       }
     }
   },
@@ -93,5 +145,34 @@
     "openai_model": "gpt-3.5-turbo",
     "max_tokens": 150,
     "temperature": 0.8
+  },
+  "video_generation": {
+    "enabled": true,
+    "use_ai_generation": true,
+    "use_runway_api": true,
+    "fallback_to_google_drive": true,
+    "ai_model": "dall-e-3",
+    "frame_count": 4,
+    "frame_duration": 2,
+    "output_format": "mp4",
+    "resolution": "1024x1024",
+    "google_drive": {
+      "enabled": true,
+      "folder_id": "1SevV-LKA67CVmEimWUwWicdJ0Eud6nHm"
+    },
+    "openai": {
+      "enabled": true,
+      "model": "dall-e-3",
+      "quality": "standard",
+      "style": "natural"
+    },
+    "runway": {
+      "enabled": true,
+      "model": "gen3a_turbo",
+      "duration": 10,
+      "ratio": "16:9",
+      "watermark": false,
+      "api_base_url": "https://api.dev.runwayml.com/v1"
+    }
   }
 }

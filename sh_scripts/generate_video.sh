@@ -32,9 +32,25 @@ mkdir -p "$MUSIC_DIR"
 # Arkaplan videosunu belirle
 VIDEO_FILE=""
 
-# OpenAI ile GIF üretme seçeneği
-if [ "${USE_OPENAI_GIF:-0}" -eq 1 ]; then
-    echo ">> OpenAI ile arkaplan GIF'i üretiliyor..."
+# Content type'ı belirle (parametreden ya da default)
+CONTENT_TYPE="${TAG:-lofi}"
+
+# AI Video Background üretme seçeneği (Yeni configuratif sistem)
+if [ "${USE_AI_VIDEO_GENERATION:-1}" -eq 1 ]; then
+    echo ">> AI ile konfigüratif arkaplan video üretiliyor..."
+    echo ">> İçerik türü: $CONTENT_TYPE"
+    VIDEO_FILE="$("$SCRIPT_DIR/generate_ai_video_background.sh" "$CONTENT_TYPE" "$CONFIG_OVERRIDE")"
+    if [ -n "$VIDEO_FILE" ] && [ -f "$VIDEO_FILE" ]; then
+        echo ">> AI üretilen video: $VIDEO_FILE"
+    else
+        echo ">> AI video üretimi başarısız, alternatif yöntemlere geçiliyor..." >&2
+        VIDEO_FILE=""
+    fi
+fi
+
+# Fallback: OpenAI ile GIF üretme seçeneği (Eski sistem)
+if [ -z "$VIDEO_FILE" ] && [ "${USE_OPENAI_GIF:-0}" -eq 1 ]; then
+    echo ">> Fallback: OpenAI ile arkaplan GIF'i üretiliyor..."
     VIDEO_FILE="$("$SCRIPT_DIR/generate_gif_with_openai.sh" "$CONFIG_OVERRIDE")"
     if [ -n "$VIDEO_FILE" ] && [ -f "$VIDEO_FILE" ]; then
         echo ">> Üretilen GIF: $VIDEO_FILE"

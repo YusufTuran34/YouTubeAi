@@ -39,6 +39,7 @@ load_channel_config() {
                 instagram.PASSWORD) export INSTAGRAM_PASSWORD="$value" ;;
 
                 openai.API_KEY) export OPENAI_API_KEY="$value" ;;
+                runway.API_KEY) export RUNWAY_API_KEY="$value" ;;
 
                 *)
                   key=$(echo "$path" | tr '.-' '_')

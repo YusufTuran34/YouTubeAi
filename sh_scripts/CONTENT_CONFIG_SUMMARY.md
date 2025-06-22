@@ -60,6 +60,8 @@ cd sh_scripts
 3. **Tutarlılık**: Tüm script'ler aynı konfigürasyonu kullanıyor
 4. **Güvenlik**: Yedekleme ve geri yükleme özellikleri
 5. **Doğrulama**: Otomatik JSON yapısı kontrolü
+6. **🎬 AI Video Generation**: ChatGPT + DALL-E ile otomatik video background üretimi
+7. **Configuratif Tag Sistemi**: Her content type için özel visual tag'ler
 
 ## 🔧 Teknik Detaylar
 
@@ -79,8 +81,24 @@ cd sh_scripts
         "general": "Genel prompt",
         "video": "Video prompt'u (opsiyonel)",
         "daily": "Günlük prompt (opsiyonel)"
+      },
+      "video_generation": {
+        "visual_tags": ["tag1", "tag2", "tag3"],
+        "background_prompt": "DALL-E için detaylı prompt",
+        "animation_style": "smooth/gentle/flowing",
+        "color_palette": "renk paleti açıklaması",
+        "mood": "atmosfer açıklaması"
       }
     }
+  },
+  "video_generation": {
+    "enabled": true,
+    "use_ai_generation": true,
+    "fallback_to_google_drive": true,
+    "ai_model": "dall-e-3",
+    "frame_count": 4,
+    "output_format": "gif/mp4",
+    "resolution": "1024x1024"
   }
 }
 ```
@@ -89,12 +107,39 @@ cd sh_scripts
 - `{VIDEO_TITLE}` - Video başlığı
 - `{ZODIAC_SIGN}` - Burç adı
 
+## 🎬 Yeni Özellik: AI Video Generation
+
+### Nasıl Çalışır?
+1. **ChatGPT Integration**: Content type'a göre detaylı frame açıklamaları üretir
+2. **DALL-E 3 Image Generation**: Her frame için high-quality görsel üretir
+3. **Configuratif Tag System**: Her içerik türü için özel visual tags
+4. **Fallback System**: AI başarısız olursa Google Drive'dan fallback
+
+### Kullanım
+```bash
+# Lofi için AI video background üret
+cd sh_scripts
+./generate_ai_video_background.sh lofi
+
+# Meditation için
+./generate_ai_video_background.sh meditation
+
+# Horoscope için
+./generate_ai_video_background.sh horoscope
+```
+
+### Gereksinimler
+- OpenAI API Key (GPT-4 + DALL-E 3 erişimi)
+- FFmpeg (GIF/MP4 için, yoksa PNG fallback)
+- jq (JSON processing için)
+
 ## 🚨 Önemli Notlar
 
 1. **jq Gereksinimi**: `manage_content_configs.sh` için `jq` yüklü olmalı
 2. **UTF-8 Encoding**: JSON dosyası UTF-8 ile kaydedilmeli
 3. **Yedekleme**: Büyük değişikliklerden önce yedek alın
 4. **Test**: Yeni kategoriler ekledikten sonra test edin
+5. **FFmpeg**: Video generation için ffmpeg kurulumu önerilir
 
 ## 📝 Örnek Kullanım
 
