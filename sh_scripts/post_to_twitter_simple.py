@@ -75,10 +75,11 @@ def load_channel_config():
         username = os.environ.get('TWITTER_USERNAME', '')
         password = os.environ.get('TWITTER_PASSWORD', '')
         handle = os.environ.get('TWITTER_HANDLE', '')
+        channel_name = os.environ.get('CHANNEL', 'default')  # CHANNEL parameter for profile selection
         
         if username and password:
-            print(f"✅ Environment variables'den yüklendi: {username}")
-            return username, password, handle
+            print(f"✅ Environment variables'den yüklendi: {username} (Channel: {channel_name})")
+            return username, password, handle, channel_name
         
         # Fallback to channels.env file (JSON format)
         if os.path.exists('channels.env'):
@@ -99,18 +100,18 @@ def load_channel_config():
                                 handle = twitter_config.get('TWITTER_USERNAME', '')
                                 
                                 if username and password:
-                                    print(f"✅ channels.env'den yüklendi: {username}")
-                                    return username, password, handle
+                                    print(f"✅ channels.env'den yüklendi: {username} (Channel: default)")
+                                    return username, password, handle, 'default'
             except Exception as e:
                 print(f"⚠️ channels.env parse error: {e}")
         
         # Final fallback to test credentials
         print("⚠️ Using test credentials")
-        return "yusuf.ai.2025.01@gmail.com", "159357asd!", "LofiRadioAi"
+        return "yusuf.ai.2025.01@gmail.com", "159357asd!", "LofiRadioAi", "default"
         
     except Exception as e:
         print(f"❌ Configuration loading error: {e}")
-        return None, None, None
+        return None, None, None, None
 
 def get_latest_video_url():
     """Get the latest video URL from file"""
@@ -144,6 +145,21 @@ def generate_tweet(content_type="lofi", zodiac_sign="aries"):
                 with open('generated_tweet.txt', 'r') as f:
                     tweet_text = f.read().strip()
                 
+                # VIDEO_TITLE placeholder'ını değiştir
+                video_title = ""
+                if os.path.exists('generated_title.txt'):
+                    with open('generated_title.txt', 'r') as f:
+                        video_title = f.read().strip()
+                
+                # Placeholder'ı doğru video title ile değiştir
+                if video_title and '{VIDEO_TITLE}' in tweet_text:
+                    tweet_text = tweet_text.replace('{VIDEO_TITLE}', video_title)
+                    print(f"✅ VIDEO_TITLE placeholder değiştirildi: {video_title}")
+                elif '{VIDEO_TITLE}' in tweet_text:
+                    # Fallback: placeholder'ı kaldır
+                    tweet_text = tweet_text.replace('{VIDEO_TITLE}', '')
+                    print("⚠️ Video title bulunamadı, placeholder kaldırıldı")
+                
                 # Check if we have a video URL to append
                 video_url = get_latest_video_url()
                 if video_url:
@@ -176,6 +192,25 @@ def generate_tweet(content_type="lofi", zodiac_sign="aries"):
     except Exception as e:
         print(f"❌ Tweet generation error: {e}")
         return None
+
+def get_persistent_profile_dir(channel_name, username):
+    """Get persistent Chrome profile directory for the account"""
+    import hashlib
+    # Create a stable hash from username for consistent profiling
+    account_hash = hashlib.md5(f"{channel_name}_{username}".encode()).hexdigest()[:8]
+    
+    # Use a permanent directory instead of /tmp
+    profile_base_dir = os.path.expanduser("~/.twitter_profiles")
+    profile_dir = f"{profile_base_dir}/chrome_profile_{channel_name}_{account_hash}"
+    
+    # Create directory if it doesn't exist
+    os.makedirs(profile_dir, exist_ok=True)
+    
+    print(f"📁 KALICI profil dizini oluşturuldu: {profile_dir}")
+    print(f"🔐 Hesap hash: {account_hash} (Channel: {channel_name})")
+    print(f"👤 Username: {username}")
+    
+    return profile_dir
 
 def cleanup_chrome_processes():
     """Clean up any leftover Chrome/ChromeDriver processes"""
@@ -224,11 +259,17 @@ def main():
     print(f"🌟 Requires Zodiac: {requires_zodiac}")
     
     # Load configuration
-    username, password, handle = load_channel_config()
-    if not username or not password:
+    config_result = load_channel_config()
+    if config_result is None or None in config_result:
         print("❌ Kullanıcı adı veya şifre bulunamadı!")
         print("❌ Giriş başarısız!")
         sys.exit(1)
+        
+    if len(config_result) == 4:
+        username, password, handle, channel_name = config_result
+    else:
+        username, password, handle = config_result[:3]
+        channel_name = "default"
     
     # Generate tweet
     tweet_text = generate_tweet(content_type, zodiac_sign)
@@ -238,15 +279,13 @@ def main():
     
     print("📤 Tweet gönderiliyor...")
     
-    # Chrome driver başlatma
-    print("🔧 Chrome driver başlatılıyor (HIZLI MOD)...")
-    import uuid
+    # Chrome driver başlatma - KALICI PROFİL SİSTEMİ
+    print("🔧 Chrome driver başlatılıyor (KALICI PROFİL MOD)...")
     import time
     
-    # Her session için benzersiz profil dizini
-    unique_id = str(uuid.uuid4())[:8]
-    timestamp = str(int(time.time()))
-    profile_dir = f"/tmp/chrome_profile_{timestamp}_{unique_id}"
+    # Hesap-bazlı kalıcı profil dizini - ARTIK GEÇİCİ DEĞİL!
+    profile_dir = get_persistent_profile_dir(channel_name, username)
+    print(f"🔐 KALICI PROFİL KULLANILIYOR: {profile_dir}")
     
     chrome_options = Options()
     # Anti-detection ayarları
@@ -259,9 +298,13 @@ def main():
     chrome_options.add_argument('--allow-running-insecure-content')
     chrome_options.add_argument('--disable-extensions')
     
-    # Benzersiz profil dizini
+    # KALICI profil dizini - aynı hesap her zaman aynı profile kullanacak
     chrome_options.add_argument(f'--user-data-dir={profile_dir}')
-    print(f"📁 Benzersiz profil dizini: {profile_dir}")
+    
+    # Consistent browser fingerprint için
+    chrome_options.add_argument('--disable-features=VizDisplayCompositor')
+    chrome_options.add_argument('--disable-default-apps')
+    chrome_options.add_argument('--disable-component-extensions-with-background-pages')
     
     # HIZLI MOD optimizasyonları (JavaScript'i disable etmeyelim çünkü Twitter için gerekli)
     if FAST_MODE:
@@ -564,15 +607,12 @@ def main():
             except Exception as e:
                 print(f"⚠️ Chrome driver kapatma hatası: {e}")
         
-        # Geçici profil dizinini temizle
-        if 'profile_dir' in locals() and os.path.exists(profile_dir):
-            try:
-                shutil.rmtree(profile_dir)
-                print(f"🗑️ Geçici profil dizini temizlendi: {profile_dir}")
-            except Exception as e:
-                print(f"⚠️ Profil dizini silinemedi: {e}")
+        # KALICI PROFİL SİSTEMİ - Profil dizinini ASLA SİLME!
+        print(f"📁 Kalıcı profil korundu: {profile_dir}")
+        print("🔄 Aynı hesap bir sonraki tweet'te AYNI PROFİLİ kullanacak")
+        print("✅ Anti-bot detection için browser fingerprint korundu!")
         
-        # Final cleanup of any remaining Chrome processes
+        # Final cleanup of any remaining Chrome processes (but not profile data)
         cleanup_chrome_processes()
 
 if __name__ == "__main__":
