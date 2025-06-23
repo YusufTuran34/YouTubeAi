@@ -13,50 +13,57 @@ load_channel_config() {
   [ -f "$env_file" ] && . "$env_file"
 
   if [ -n "$CHANNEL_CONFIGS" ] && command -v jq >/dev/null 2>&1; then
-    json=$(echo "$CHANNEL_CONFIGS" | jq -c --arg name "$channel" '.[] | select(.name==$name)')
-    if [ -n "$json" ]; then
-      tmpfile=$(mktemp) || exit 1
-      echo "$json" | jq -r 'paths(scalars) as $p |
-        [($p|join(".")), (getpath($p))] | @tsv' > "$tmpfile"
+    # Validate JSON before processing
+    if echo "$CHANNEL_CONFIGS" | jq empty >/dev/null 2>&1; then
+      json=$(echo "$CHANNEL_CONFIGS" | jq -c --arg name "$channel" '.[] | select(.name==$name)')
+      if [ -n "$json" ]; then
+        tmpfile=$(mktemp) || exit 1
+        echo "$json" | jq -r 'paths(scalars) as $p |
+          [($p|join(".")), (getpath($p))] | @tsv' > "$tmpfile"
 
-            while IFS="$(printf '\t')" read -r path value; do
-              case "$path" in
-                youtube.CLIENT_ID) export CLIENT_ID="$value" ;;
-                youtube.CLIENT_SECRET) export CLIENT_SECRET="$value" ;;
-                youtube.REFRESH_TOKEN) export REFRESH_TOKEN="$value" ;;
-                youtube.STREAM_KEY) export YOUTUBE_STREAM_KEY="$value" ;;
+              while IFS="$(printf '\t')" read -r path value; do
+                case "$path" in
+                  youtube.CLIENT_ID) export CLIENT_ID="$value" ;;
+                  youtube.CLIENT_SECRET) export CLIENT_SECRET="$value" ;;
+                  youtube.REFRESH_TOKEN) export REFRESH_TOKEN="$value" ;;
+                  youtube.STREAM_KEY) export YOUTUBE_STREAM_KEY="$value" ;;
 
-                twitter.API_KEY) export TWITTER_API_KEY="$value" ;;
-                twitter.API_SECRET) export TWITTER_API_SECRET="$value" ;;
-                twitter.ACCESS_TOKEN) export TWITTER_ACCESS_TOKEN="$value" ;;
-                twitter.ACCESS_SECRET) export TWITTER_ACCESS_SECRET="$value" ;;
-                twitter.CLIENT_ID) export TWITTER_CLIENT_ID="$value" ;;
-                twitter.CLIENT_SECRET) export TWITTER_CLIENT_SECRET="$value" ;;
-                twitter.TWITTER_AUTH_CODE) export TWITTER_AUTH_CODE="$value" ;;
-                twitter.TWITTER_CODE_VERIFIER) export TWITTER_CODE_VERIFIER="$value" ;;
+                  twitter.API_KEY) export TWITTER_API_KEY="$value" ;;
+                  twitter.API_SECRET) export TWITTER_API_SECRET="$value" ;;
+                  twitter.ACCESS_TOKEN) export TWITTER_ACCESS_TOKEN="$value" ;;
+                  twitter.ACCESS_SECRET) export TWITTER_ACCESS_SECRET="$value" ;;
+                  twitter.CLIENT_ID) export TWITTER_CLIENT_ID="$value" ;;
+                  twitter.CLIENT_SECRET) export TWITTER_CLIENT_SECRET="$value" ;;
+                  twitter.TWITTER_AUTH_CODE) export TWITTER_AUTH_CODE="$value" ;;
+                  twitter.TWITTER_CODE_VERIFIER) export TWITTER_CODE_VERIFIER="$value" ;;
 
-                instagram.USERNAME) export INSTAGRAM_USERNAME="$value" ;;
-                instagram.PASSWORD) export INSTAGRAM_PASSWORD="$value" ;;
+                  instagram.USERNAME) export INSTAGRAM_USERNAME="$value" ;;
+                  instagram.PASSWORD) export INSTAGRAM_PASSWORD="$value" ;;
 
-                openai.API_KEY) export OPENAI_API_KEY="$value" ;;
-                runway.API_KEY) export RUNWAY_API_KEY="$value" ;;
+                  openai.API_KEY) export OPENAI_API_KEY="$value" ;;
+                  runway.API_KEY) export RUNWAY_API_KEY="$value" ;;
 
-                *)
-                  key=$(echo "$path" | tr '.-' '_')
-                  export "$key"="$value"
-                  ;;
-              esac
-            done < "$tmpfile"
+                  *)
+                    key=$(echo "$path" | tr '.-' '_')
+                    export "$key"="$value"
+                    ;;
+                esac
+              done < "$tmpfile"
 
-
-      rm -f "$tmpfile"
+        rm -f "$tmpfile"
+      else
+        echo "[HATA] '$channel' isimli kanal CHANNEL_CONFIGS içinde bulunamadı!" >&2
+        exit 1
+      fi
     else
-      echo "[HATA] '$channel' isimli kanal CHANNEL_CONFIGS içinde bulunamadı!" >&2
-      exit 1
+      echo "[DEBUG] CHANNEL_CONFIGS geçersiz JSON formatında, environment variable'ları doğrudan kullanılıyor..." >&2
+      # Continue with existing env vars set by JobService
+      return 0 2>/dev/null || true
     fi
   else
-    echo "[HATA] jq bulunamadı veya CHANNEL_CONFIGS boş!" >&2
-    exit 1
+    echo "[DEBUG] CHANNEL_CONFIGS boş, environment variable'ları doğrudan kullanılıyor..." >&2
+    # Don't exit - let the script continue with existing env vars or fail gracefully later
+    return 0 2>/dev/null || true
   fi
 
   if [ -n "$override" ] && [ -f "$override" ]; then

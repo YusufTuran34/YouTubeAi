@@ -133,7 +133,7 @@ fi
 
 # Chunked upload için dosya boyutunu al
 FILE_SIZE=$(stat -f%z "$VIDEO_PATH" 2>/dev/null || stat -c%s "$VIDEO_PATH" 2>/dev/null)
-CHUNK_SIZE=10485760  # 10MB chunks
+CHUNK_SIZE=104857600  # 100MB chunks (daha hızlı upload - 5dk video için ideal)
 TOTAL_CHUNKS=$(( (FILE_SIZE + CHUNK_SIZE - 1) / CHUNK_SIZE ))
 
 echo "📁 Video boyutu: $FILE_SIZE bytes"

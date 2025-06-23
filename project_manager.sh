@@ -8,22 +8,43 @@ case "$ACTION" in
     echo "🧹 Proje temizleniyor..."
     cd sh_scripts && ./auto_cleanup.sh
     ;;
+  "deep-clean")
+    echo "🔥 DERİN TEMİZLİK BAŞLATILIYOR..."
+    echo "🧹 Otomatik temizlik çalıştırılıyor..."
+    cd sh_scripts && ./auto_cleanup.sh
+    cd ..
+    echo "🗑️ Geçici dosyalar temizleniyor..."
+    rm -rf /tmp/chrome_profile_* 2>/dev/null || true
+    rm -rf /tmp/tmp.* 2>/dev/null || true
+    rm -rf sh_scripts/ai_generated_background_* 2>/dev/null || true
+    rm -rf sh_scripts/runway_generated_background_* 2>/dev/null || true
+    echo "📁 Build cache temizleniyor..."
+    ./gradlew clean 2>/dev/null || true
+    echo "🔧 System processes kontrol ediliyor..."
+    pkill -f "java.*SchedulerApplication" 2>/dev/null || true
+    pkill -f chromedriver 2>/dev/null || true
+    pkill -f chrome 2>/dev/null || true
+    lsof -ti:8080 | xargs kill -9 2>/dev/null || true
+    echo "✅ Derin temizlik tamamlandı!"
+    ;;
   "test")
     echo "🧪 Hızlı testler çalıştırılıyor..."
     cd sh_scripts && ./quick_test.sh "${2:-all}"
     ;;
   "start")
     echo "🚀 Proje başlatılıyor..."
-    $0 clean
-    echo "⏳ 3 saniye bekleniyor..."
-    sleep 3
+    echo "🔥 Derin temizlik yapılıyor..."
+    $0 deep-clean
+    echo "⏳ 5 saniye güvenlik bekleniyor..."
+    sleep 5
+    echo "🎯 Spring Boot başlatılıyor..."
     ./gradlew bootRun --no-daemon
     ;;
   "restart")
     echo "🔄 Proje yeniden başlatılıyor..."
-    $0 clean
-    echo "⏳ 5 saniye bekleniyor..."
-    sleep 5
+    $0 deep-clean
+    echo "⏳ 10 saniye güvenlik bekleniyor..."
+    sleep 10
     $0 start
     ;;
   "status")
@@ -50,6 +71,7 @@ case "$ACTION" in
     echo ""
     echo "Komutlar:"
     echo "  clean     - Sistem temizliği (Chrome, Java, port)"
+    echo "  deep-clean - Derin temizlik (Chrome, Java, port)"
     echo "  test      - Hızlı testler (tweet, horoscope, lofi, config, all)"
     echo "  start     - Projeyi başlat (temizlik + start)"
     echo "  restart   - Projeyi yeniden başlat"
@@ -59,6 +81,7 @@ case "$ACTION" in
     echo ""
     echo "Örnekler:"
     echo "  $0 clean              # Sistem temizliği"
+    echo "  $0 deep-clean         # Derin temizlik"
     echo "  $0 test tweet         # Sadece tweet testi"
     echo "  $0 test all           # Tüm testler"
     echo "  $0 start              # Projeyi başlat"

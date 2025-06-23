@@ -35,46 +35,60 @@ VIDEO_FILE=""
 # Content type'ı belirle (parametreden ya da default)
 CONTENT_TYPE="${TAG:-lofi}"
 
-# AI Video Background üretme seçeneği (Yeni configuratif sistem)
-if [ "${USE_AI_VIDEO_GENERATION:-1}" -eq 1 ]; then
+# AI Video Background üretme seçeneği
+if [ "${USE_AI_VIDEO_GENERATION:-0}" -eq 1 ]; then
     echo ">> AI ile konfigüratif arkaplan video üretiliyor..."
-    echo ">> İçerik türü: $CONTENT_TYPE"
-    VIDEO_FILE="$("$SCRIPT_DIR/generate_ai_video_background.sh" "$CONTENT_TYPE" "$CONFIG_OVERRIDE")"
-    if [ -n "$VIDEO_FILE" ] && [ -f "$VIDEO_FILE" ]; then
-        echo ">> AI üretilen video: $VIDEO_FILE"
+    echo ">> İçerik türü: ${CONTENT_TYPE}"
+    
+    # Try AI video generation first
+    echo ">> 🤖 AI video generation script çalıştırılıyor..."
+    AI_VIDEO_OUTPUT=$("$SCRIPT_DIR/generate_ai_video_background.sh" "$CONTENT_TYPE" 2>&1)
+    AI_EXIT_CODE=$?
+    
+    # Parse the last line as the output file path (AI script outputs path as last line)
+    AI_VIDEO_FILE=$(echo "$AI_VIDEO_OUTPUT" | tail -1 | grep -E '\.(mp4|gif|png)$')
+    
+    if [ $AI_EXIT_CODE -eq 0 ] && [ -n "$AI_VIDEO_FILE" ] && [ -f "$AI_VIDEO_FILE" ]; then
+        VIDEO_FILE="$AI_VIDEO_FILE"
+        echo ">> ✅ AI video başarıyla üretildi: $VIDEO_FILE"
     else
-        echo ">> AI video üretimi başarısız, alternatif yöntemlere geçiliyor..." >&2
+        echo ">> ⚠️ AI video üretimi başarısız (exit code: $AI_EXIT_CODE), alternatif yöntemlere geçiliyor..."
+        echo ">> 📋 AI Script Output (debug):"
+        echo "$AI_VIDEO_OUTPUT" | head -5
+        echo ">> 📋 Parsed file path: '$AI_VIDEO_FILE'"
         VIDEO_FILE=""
     fi
 fi
 
-# Fallback: OpenAI ile GIF üretme seçeneği (Eski sistem)
+# FALLBACK SİSTEMLERİ - Basic fallback sistemini aktif hale getirdim
+# Fallback 1: OpenAI ile GIF üretme seçeneği (Eski sistem) - İsteğe bağlı
 if [ -z "$VIDEO_FILE" ] && [ "${USE_OPENAI_GIF:-0}" -eq 1 ]; then
     echo ">> Fallback: OpenAI ile arkaplan GIF'i üretiliyor..."
     VIDEO_FILE="$("$SCRIPT_DIR/generate_gif_with_openai.sh" "$CONFIG_OVERRIDE")"
     if [ -n "$VIDEO_FILE" ] && [ -f "$VIDEO_FILE" ]; then
-        echo ">> Üretilen GIF: $VIDEO_FILE"
+        echo ">> ✅ Üretilen GIF: $VIDEO_FILE"
     else
-        echo "HATA: OpenAI GIF üretimi başarısız oldu." >&2
+        echo ">> ❌ OpenAI GIF üretimi başarısız oldu." >&2
         VIDEO_FILE=""
     fi
 fi
 
-# OpenAI başarısız olduysa Google Drive'dan dosya indir
+# Fallback 2: Google Drive'dan dosya indir - İsteğe bağlı
 if [ -z "$VIDEO_FILE" ] && [ "${USE_GOOGLE_DRIVE:-0}" -eq 1 ] && [ -n "$DRIVE_FOLDER_ID" ]; then
     if command -v gdown >/dev/null 2>&1; then
-        echo ">> Google Drive'dan arkaplan dosyası indiriliyor..."
+        echo ">> Fallback: Google Drive'dan arkaplan dosyası indiriliyor..."
         TMP_DRIVE_DIR=$(mktemp -d)
-        gdown --quiet --folder "https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}" -O "$TMP_DRIVE_DIR" --remaining-ok
+        gdown --quiet --folder "https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}" -O "$TMP_DRIVE_DIR" --remaining-ok 2>/dev/null
         DRIVE_FILE=$(find "$TMP_DRIVE_DIR" -type f \( -iname '*.mp4' -o -iname '*.gif' \) | shuf -n 1)
         if [ -n "$DRIVE_FILE" ]; then
             VIDEO_FILE="$DRIVE_FILE"
-            echo ">> İndirilen dosya: $VIDEO_FILE"
+            echo ">> ✅ İndirilen dosya: $VIDEO_FILE"
         else
-            echo "HATA: Google Drive klasöründe uygun dosya bulunamadı." >&2
+            echo ">> ⚠️ Google Drive klasöründe uygun dosya bulunamadı." >&2
         fi
+        rm -rf "$TMP_DRIVE_DIR" 2>/dev/null
     else
-        echo "HATA: gdown aracı yüklü değil, Google Drive kullanılamıyor." >&2
+        echo ">> ⚠️ gdown aracı yüklü değil, Google Drive kullanılamıyor." >&2
     fi
 fi
 
@@ -160,13 +174,14 @@ done
 echo ">> Toplam müzik süresi: $total_duration saniye"
 
 # FFmpeg ile videoyu oluştur
+# FFmpeg ile videoyu oluştur
 echo ">> FFmpeg ile $VIDEO_DURATION_HOURS saatlik video oluşturuluyor ($OUTPUT_VIDEO)..."
 ffmpeg -y -stream_loop -1 -i "$VIDEO_FILE" \
     -f concat -safe 0 -i "$AUDIO_LIST_EXTENDED" \
     -map 0:v -map 1:a \
-    -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,fps=${GIF_FPS:-30}" \
-    -c:v ${VIDEO_CODEC:-libx264} -preset ${PRESET:-ultrafast} -pix_fmt yuv420p \
-    -c:a ${AUDIO_CODEC:-aac} -b:a ${AUDIO_BITRATE:-160k} \
+    -vf "scale=854:480,fps=${GIF_FPS:-24}" \
+    -c:v ${VIDEO_CODEC:-libx264} -preset ${PRESET:-veryfast} -pix_fmt yuv420p \
+    -c:a ${AUDIO_CODEC:-aac} -b:a ${AUDIO_BITRATE:-128k} \
     -movflags +faststart \
     -t "$TARGET_SECONDS" "$OUTPUT_VIDEO"
 

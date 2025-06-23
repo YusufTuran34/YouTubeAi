@@ -109,12 +109,72 @@ public class JobService {
                 }
             }
             ProcessBuilder pb = new ProcessBuilder(command);
+            
+            // Set channel environment variable
             if (job.getChannel() != null && !job.getChannel().isBlank()) {
                 pb.environment().put("CHANNEL", job.getChannel());
             }
             
-            // Add Twitter credentials as environment variables for Python scripts
-            if (script.endsWith(".py")) {
+            // Load and set API keys from channels.env
+            try {
+                File channelsEnv = new File("sh_scripts/channels.env");
+                if (channelsEnv.exists()) {
+                    String envContent = new String(java.nio.file.Files.readAllBytes(channelsEnv.toPath()));
+                    
+                    // Parse CHANNEL_CONFIGS JSON
+                    int idx = envContent.indexOf("CHANNEL_CONFIGS='");
+                    if (idx >= 0) {
+                        int start = idx + "CHANNEL_CONFIGS='".length();
+                        int end = envContent.indexOf("'", start);
+                        if (end > start) {
+                            String jsonStr = envContent.substring(start, end);
+                            ObjectMapper mapper = new ObjectMapper();
+                            JsonNode configs = mapper.readTree(jsonStr);
+                            
+                            // Find the correct channel config
+                            String channelName = job.getChannel() != null ? job.getChannel() : "default";
+                            for (JsonNode config : configs) {
+                                if (channelName.equals(config.get("name").asText())) {
+                                    // Set OpenAI API key
+                                    JsonNode openai = config.get("openai");
+                                    if (openai != null && openai.get("API_KEY") != null) {
+                                        String apiKey = openai.get("API_KEY").asText();
+                                        pb.environment().put("OPENAI_API_KEY", apiKey);
+                                        logger.info("Set OPENAI_API_KEY for job {} (length: {})", job.getName(), apiKey.length());
+                                    }
+                                    
+                                    // Set Runway API key
+                                    JsonNode runway = config.get("runway");
+                                    if (runway != null && runway.get("API_KEY") != null) {
+                                        String runwayKey = runway.get("API_KEY").asText();
+                                        pb.environment().put("RUNWAY_API_KEY", runwayKey);
+                                        logger.info("Set RUNWAY_API_KEY for job {} (length: {})", job.getName(), runwayKey.length());
+                                    }
+                                    
+                                    // Set Twitter credentials
+                                    JsonNode twitter = config.get("twitter");
+                                    if (twitter != null) {
+                                        if (twitter.get("USERNAME") != null) {
+                                            pb.environment().put("TWITTER_USERNAME", twitter.get("USERNAME").asText());
+                                        }
+                                        if (twitter.get("PASSWORD") != null) {
+                                            pb.environment().put("TWITTER_PASSWORD", twitter.get("PASSWORD").asText());
+                                        }
+                                        if (twitter.get("TWITTER_USERNAME") != null) {
+                                            pb.environment().put("TWITTER_HANDLE", twitter.get("TWITTER_USERNAME").asText());
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        logger.warn("channels.env file not found for job {}", job.getName());
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to load environment from channels.env for job {}: {}", job.getName(), e.getMessage());
+                // Fallback to hardcoded values for Twitter
                 pb.environment().put("TWITTER_USERNAME", "yusuf.ai.2025.01@gmail.com");
                 pb.environment().put("TWITTER_PASSWORD", "159357asd!");
                 pb.environment().put("TWITTER_HANDLE", "LofiRadioAi");

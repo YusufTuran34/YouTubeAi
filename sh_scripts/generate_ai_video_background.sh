@@ -2,14 +2,22 @@
 # generate_ai_video_background.sh - Generate video background using AI with configurable tags
 
 # Set PATH to ensure commands work
-export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH"
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/homebrew/bin:$PATH"
+
+# Ensure jq is available
+if ! command -v jq >/dev/null 2>&1; then
+    echo "❌ jq command not found in PATH"
+    echo "🔍 Current PATH: $PATH"
+    exit 1
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONTENT_TYPE="${1:-lofi}"
 CONFIG_OVERRIDE="${2:-}"
 
 # Load channel configuration to get OpenAI API key
-if [ -f "$SCRIPT_DIR/common.sh" ]; then
+# But only if API keys are not already set (from Spring Boot JobService)
+if [ -z "$OPENAI_API_KEY" ] && [ -f "$SCRIPT_DIR/common.sh" ]; then
     source "$SCRIPT_DIR/common.sh" 2>/dev/null || true
     load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE" 2>/dev/null || true
 fi
@@ -17,11 +25,21 @@ fi
 # JSON configuration file path
 CONFIG_FILE="$SCRIPT_DIR/content_configs.json"
 
+# Spring Boot context path fix
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    # Try from main directory (Spring Boot context)
+    CONFIG_FILE="sh_scripts/content_configs.json"
+fi
+
 # Check if JSON config file exists
 if [[ ! -f "$CONFIG_FILE" ]]; then
     echo "❌ Configuration file not found: $CONFIG_FILE"
+    echo "🔍 Tried paths: $SCRIPT_DIR/content_configs.json and sh_scripts/content_configs.json"
+    echo "🔍 Current working directory: $(pwd)"
     exit 1
 fi
+
+echo "🔍 DEBUG: Using CONFIG_FILE: $CONFIG_FILE"
 
 # Check if OpenAI API key is loaded
 if [ -z "$OPENAI_API_KEY" ]; then
@@ -29,8 +47,52 @@ if [ -z "$OPENAI_API_KEY" ]; then
     exit 1
 fi
 
+echo "🔍 DEBUG: Environment variables in script context:"
+echo "🔍 OPENAI_API_KEY: ${OPENAI_API_KEY:0:20}..."
+echo "🔍 RUNWAY_API_KEY: ${RUNWAY_API_KEY:0:20}..."
+echo "🔍 CONFIG_FILE: $CONFIG_FILE"
+echo "🔍 CONTENT_TYPE: $CONTENT_TYPE"
+echo "🔍 PWD: $(pwd)"
+echo "🔍 PARENT_SHELL: $0"
+echo "🔍 CHANNEL_CONFIGS: ${CHANNEL_CONFIGS:0:50}..."
+
 # Validate content type using JSON
-VALID_CONTENT_TYPES=$(jq -r '.content_types | keys | join(" ")' "$CONFIG_FILE")
+echo "🔍 DEBUG: Running jq command to validate content types..."
+echo "🔍 DEBUG: CONFIG_FILE absolute path: $(realpath "$CONFIG_FILE" 2>/dev/null || echo 'REALPATH_FAILED')"
+echo "🔍 DEBUG: File readable? $(test -r "$CONFIG_FILE" && echo 'YES' || echo 'NO')"
+echo "🔍 DEBUG: File contents first line:"
+head -n 1 "$CONFIG_FILE" 2>/dev/null | cat -v
+echo "🔍 DEBUG: File contents first 100 chars with hex dump:"
+head -c 100 "$CONFIG_FILE" 2>/dev/null | xxd | head -3
+
+# Test jq with simple command first
+echo "🔍 DEBUG: Testing jq with simple command..."
+jq --version 2>&1 || echo "jq not found"
+
+# Test JSON validity
+echo "🔍 DEBUG: Testing JSON validity..."
+JSON_TEST=$(jq empty "$CONFIG_FILE" 2>&1)
+if [ $? -eq 0 ]; then
+    echo "JSON is valid"
+else
+    echo "JSON is invalid: $JSON_TEST"
+    echo "🔍 File content preview:"
+    head -5 "$CONFIG_FILE" 2>/dev/null || echo "Cannot read file"
+    exit 1
+fi
+
+VALID_CONTENT_TYPES=$(jq -r '.content_types | keys | join(" ")' "$CONFIG_FILE" 2>&1)
+if [ $? -ne 0 ]; then
+    echo "❌ jq command failed: $VALID_CONTENT_TYPES"
+    echo "🔍 DEBUG: CONFIG_FILE contents (first 200 chars):"
+    head -c 200 "$CONFIG_FILE"
+    echo ""
+    echo "🔍 DEBUG: File exists? $(test -f "$CONFIG_FILE" && echo 'YES' || echo 'NO')"
+    echo "🔍 DEBUG: File size: $(wc -c < "$CONFIG_FILE" 2>/dev/null || echo 'ERROR')"
+    exit 1
+fi
+echo "🔍 DEBUG: Valid content types: $VALID_CONTENT_TYPES"
+
 if ! echo "$VALID_CONTENT_TYPES" | grep -q "$CONTENT_TYPE"; then
     echo "❌ Invalid content type: $CONTENT_TYPE"
     echo "✅ Available types: $VALID_CONTENT_TYPES"
