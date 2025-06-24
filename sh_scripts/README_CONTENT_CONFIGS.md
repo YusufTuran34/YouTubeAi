@@ -231,14 +231,39 @@ Her content type için özel video generation ayarları bulunur:
   "fallback_to_google_drive": true,       // Fallback olarak Google Drive
   "ai_model": "dall-e-3",                // DALL-E model versiyonu
   "frame_count": 4,                       // Kaç frame üretilsin
-  "output_format": "gif"                  // Çıkış formatı (gif/mp4)
+  "output_format": "gif",                 // Çıkış formatı (gif/mp4)
+  "reverse_playback": {                   // 🆕 REVERSE PLAYBACK ÖZELLİĞİ
+    "enabled": true,                      // Geriye oynatma aktif mi?
+    "play_forward_then_reverse": true,    // İleri-geri döngüsü
+    "seamless_loop": true,                // Kesintisiz döngü
+    "description": "Video süresini 2 katına çıkarır"
+  }
 }
 ```
 
-### Çalışma Prensibi
-1. 🤖 **ChatGPT**: Content type'a göre frame açıklamaları üretir
-2. 🎨 **DALL-E 3**: Her frame için high-quality görsel oluşturur  
-3. 🎬 **FFmpeg**: Frame'leri birleştirip GIF/MP4 yapar
-4. 📁 **Fallback**: AI başarısız olursa Google Drive'dan dosya alır
+### 🆕 Reverse Playback Özelliği
+Bu özellik ile generate edilen videolar önce ileri, sonra geriye oynatılarak sürekli döngü yapar:
+
+**Avantajları:**
+- 📈 Video süresini 2 katına çıkarır
+- 🔄 Kesintisiz sonsuz döngü yaratır  
+- 🎵 Müzik eklenmeden önce video işlenir
+- ⚙️ Tamamen konfigüratif yönetim
+
+**Çalışma Prensibi:**
+1. 📹 Orijinal video oluşturulur (örn: 5 saniye)
+2. ⏪ Video ters çevrilerek reverse versiyonu yaratılır 
+3. 🔗 İkisi birleştirilerek seamless loop elde edilir (toplam: 10 saniye)
+4. 🎵 Bu işlenmiş video üzerine müzik eklenir
+
+**Kullanım:**
+```bash
+# Otomatik olarak aktif - content_configs.json'dan kontrol edilir
+export USE_AI_VIDEO_GENERATION=1
+./generate_video.sh
+
+# AI video generation ile birlikte
+./generate_ai_video_background.sh lofi
+```
 
 Bu sistem sayesinde artık tweet içerik türlerinizi ve video background'larınızı tamamen bağımsız olarak yönetebilirsiniz! 🎉 

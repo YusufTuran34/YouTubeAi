@@ -176,9 +176,76 @@ done
 echo ">> Toplam müzik süresi: $total_duration saniye"
 
 # FFmpeg ile videoyu oluştur
-# FFmpeg ile videoyu oluştur
 echo ">> FFmpeg ile $VIDEO_DURATION_HOURS saatlik video oluşturuluyor ($OUTPUT_VIDEO)..."
-ffmpeg -y -stream_loop -1 -i "$VIDEO_FILE" \
+
+# First, check if reverse playback is enabled for the input video file
+REVERSE_ENABLED="false"
+PLAY_FORWARD_REVERSE="false"
+
+# Load reverse playback settings from content configs if available
+if [ -f "$SH_SCRIPTS_DIR/content_configs.json" ]; then
+    REVERSE_ENABLED=$(jq -r '.video_generation.reverse_playback.enabled // false' "$SH_SCRIPTS_DIR/content_configs.json" 2>/dev/null || echo "false")
+    PLAY_FORWARD_REVERSE=$(jq -r '.video_generation.reverse_playback.play_forward_then_reverse // false' "$SH_SCRIPTS_DIR/content_configs.json" 2>/dev/null || echo "false")
+fi
+
+echo ">> 🔍 Reverse playback settings: enabled=$REVERSE_ENABLED, forward_reverse=$PLAY_FORWARD_REVERSE"
+
+# Apply reverse playback to source video BEFORE adding music (if enabled)
+PROCESSED_VIDEO_FILE="$VIDEO_FILE"
+if [ "$REVERSE_ENABLED" = "true" ] && [ "$PLAY_FORWARD_REVERSE" = "true" ] && command -v ffmpeg >/dev/null 2>&1; then
+    echo ">> 🔄 Applying reverse playbook to source video before adding music..."
+    
+    # Create temporary files for processing
+    REVERSE_VIDEO_FILE="/tmp/reverse_$(basename "$VIDEO_FILE")"
+    COMBINED_VIDEO_FILE="/tmp/combined_$(basename "$VIDEO_FILE")"
+    
+    # Create reverse video with proper re-encoding
+    echo ">> ⏪ Creating reverse version of source video with re-encoding..."
+    ffmpeg -y -i "$VIDEO_FILE" \
+        -vf "reverse,fps=30" \
+        -c:v libx264 -preset fast -pix_fmt yuv420p \
+        -an \
+        "$REVERSE_VIDEO_FILE" >/dev/null 2>&1
+    
+    if [ -f "$REVERSE_VIDEO_FILE" ]; then
+        # Re-encode original to match reverse format exactly
+        TEMP_ORIGINAL_VIDEO="/tmp/temp_original_$(basename "$VIDEO_FILE")"
+        echo ">> 🔄 Re-encoding original video for compatibility..."
+        ffmpeg -y -i "$VIDEO_FILE" \
+            -c:v libx264 -preset fast -pix_fmt yuv420p \
+            -r 30 -an \
+            "$TEMP_ORIGINAL_VIDEO" >/dev/null 2>&1
+        
+        if [ -f "$TEMP_ORIGINAL_VIDEO" ]; then
+            # Create concatenation list with matching formats
+            echo "file '$TEMP_ORIGINAL_VIDEO'" > /tmp/video_concat_list.txt
+            echo "file '$REVERSE_VIDEO_FILE'" >> /tmp/video_concat_list.txt
+            
+            # Combine original and reverse with re-encoding
+            echo ">> 🔗 Combining forward and reverse for seamless background loop..."
+            ffmpeg -y -f concat -safe 0 -i /tmp/video_concat_list.txt \
+                -c:v libx264 -preset fast -pix_fmt yuv420p \
+                "$COMBINED_VIDEO_FILE" >/dev/null 2>&1
+            
+            if [ -f "$COMBINED_VIDEO_FILE" ]; then
+                PROCESSED_VIDEO_FILE="$COMBINED_VIDEO_FILE"
+                echo ">> ✅ Reverse playback applied to source video - duration doubled!"
+            else
+                echo ">> ⚠️ Failed to combine forward and reverse videos, using original"
+            fi
+            
+            # Cleanup temporary files
+            rm -f "$REVERSE_VIDEO_FILE" "$TEMP_ORIGINAL_VIDEO" /tmp/video_concat_list.txt
+        else
+            echo ">> ⚠️ Failed to re-encode original video, using original"
+            rm -f "$REVERSE_VIDEO_FILE" /tmp/video_concat_list.txt
+        fi
+    else
+        echo ">> ⚠️ Failed to create reverse video, using original"
+    fi
+fi
+
+ffmpeg -y -stream_loop -1 -i "$PROCESSED_VIDEO_FILE" \
     -f concat -safe 0 -i "$AUDIO_LIST_EXTENDED" \
     -map 0:v -map 1:a \
     -vf "scale=854:480,fps=${GIF_FPS:-24}" \
@@ -190,6 +257,11 @@ ffmpeg -y -stream_loop -1 -i "$VIDEO_FILE" \
 if [ $? -ne 0 ]; then
     echo "FFmpeg video oluşturma işlemi başarısız oldu!" >&2
     exit 1
+fi
+
+# Cleanup temporary combined video file if it was created
+if [ "$PROCESSED_VIDEO_FILE" != "$VIDEO_FILE" ]; then
+    rm -f "$PROCESSED_VIDEO_FILE"
 fi
 
 echo ">> Video başarıyla oluşturuldu: $OUTPUT_VIDEO"

@@ -196,8 +196,45 @@ CREATE TABLE job_runs (
 ### 3. generate_video.sh (GÜNCELLENDİ)
 - **AI Video Generation Integration**: Yeni configuratif sistemi kullanır
 - **Content Type Support**: TAG parametresi ile content type belirleme
+- **🆕 Reverse Playback**: Video süresini 2 katına çıkaran ileri-geri döngü
 - **Fallback Chain**: AI → Legacy OpenAI GIF → Google Drive
 - **Improved Error Handling**: Daha güçlü hata yönetimi
+
+## 🆕 Reverse Playback Özelliği
+
+### Çalışma Prensibi
+1. **Orijinal Video**: Kaynak video normal oynatılır (örn: 5 saniye)
+2. **Video Re-encoding**: Her iki video da aynı codec/format'a re-encode edilir
+3. **Reverse Generation**: Video ters çevrilerek reverse versiyonu yaratılır (30fps, libx264)
+4. **Format Matching**: Original video da aynı formata dönüştürülür
+5. **Seamless Concatenation**: İki video birleştirilerek kesintisiz döngü elde edilir (10 saniye)
+6. **Music Integration**: Bu işlenmiş video üzerine müzik eklenir
+
+### ⚠️ Sorun Giderme
+**Video 5. saniyede donuyorsa:**
+- FFmpeg reverse işlemi codec uyumsuzluğu yaşıyor
+- **Çözüm**: Her iki video da libx264 codec'ine re-encode ediliyor
+- Format matching: yuv420p pixel format + 30fps
+
+### Configuratif Yönetim
+```json
+{
+  "video_generation": {
+    "reverse_playback": {
+      "enabled": true,
+      "play_forward_then_reverse": true,
+      "seamless_loop": true,
+      "description": "Video süresini 2 katına çıkarır"
+    }
+  }
+}
+```
+
+### Avantajları
+- 📈 **Süre Artışı**: Video süresini 2 katına çıkarır
+- 🔄 **Sonsuz Döngü**: Kesintisiz loop yaratır  
+- 🎵 **Pre-Music Processing**: Müzik eklenmeden önce işlenir
+- ⚙️ **Configuratif**: JSON ile tamamen kontrol edilebilir
 
 ### 4. generate_tweet_advanced.sh
 - **OpenAI Entegrasyonu**: GPT modeli ile tweet üretimi

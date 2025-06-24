@@ -156,6 +156,12 @@
     "frame_duration": 2,
     "output_format": "mp4",
     "resolution": "1024x1024",
+    "reverse_playback": {
+      "enabled": true,
+      "play_forward_then_reverse": true,
+      "seamless_loop": true,
+      "description": "Play video forward, then reverse for seamless infinite loop"
+    },
     "google_drive": {
       "enabled": true,
       "folder_id": "1SevV-LKA67CVmEimWUwWicdJ0Eud6nHm"

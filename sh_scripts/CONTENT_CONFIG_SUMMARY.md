@@ -62,6 +62,7 @@ cd sh_scripts
 5. **Doğrulama**: Otomatik JSON yapısı kontrolü
 6. **🎬 AI Video Generation**: ChatGPT + DALL-E ile otomatik video background üretimi
 7. **Configuratif Tag Sistemi**: Her content type için özel visual tag'ler
+8. **🆕 Reverse Playback**: Video süresini 2 katına çıkaran ileri-geri döngü sistemi
 
 ## 🔧 Teknik Detaylar
 
@@ -98,7 +99,13 @@ cd sh_scripts
     "ai_model": "dall-e-3",
     "frame_count": 4,
     "output_format": "gif/mp4",
-    "resolution": "1024x1024"
+    "resolution": "1024x1024",
+    "reverse_playback": {
+      "enabled": true,
+      "play_forward_then_reverse": true,
+      "seamless_loop": true,
+      "description": "Video süresini 2 katına çıkarır"
+    }
   }
 }
 ```

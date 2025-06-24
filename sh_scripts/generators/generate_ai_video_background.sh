@@ -228,6 +228,68 @@ if [[ "$USE_RUNWAY_API" == "true" && -n "$RUNWAY_API_KEY" ]]; then
                 if [[ -f "$OUTPUT_FILE" ]]; then
                     echo "✅ Real AI video created successfully: $OUTPUT_FILE"
                     echo "$OUTPUT_FILE"
+                    
+                    # Check if reverse playback is enabled in configuration
+                    REVERSE_ENABLED=$(jq -r '.video_generation.reverse_playback.enabled' "$CONFIG_FILE")
+                    PLAY_FORWARD_REVERSE=$(jq -r '.video_generation.reverse_playback.play_forward_then_reverse' "$CONFIG_FILE")
+                    
+                    if [[ "$REVERSE_ENABLED" == "true" && "$PLAY_FORWARD_REVERSE" == "true" && "$OUTPUT_FORMAT" == "mp4" ]]; then
+                        echo "🔄 Applying reverse playback to double video duration..."
+                        
+                        # Create temporary reverse video
+                        REVERSE_FILE="${OUTPUT_FILE%.*}_reverse_temp.mp4"
+                        FINAL_OUTPUT="${OUTPUT_FILE%.*}_final.mp4"
+                        
+                        if command -v ffmpeg >/dev/null 2>&1; then
+                            # Create reverse video with proper re-encoding
+                            echo "⏪ Creating reverse version with re-encoding..."
+                            ffmpeg -y -i "$OUTPUT_FILE" \
+                                -vf "reverse,fps=30" \
+                                -c:v libx264 -preset fast -pix_fmt yuv420p \
+                                -an \
+                                "$REVERSE_FILE" >/dev/null 2>&1
+                            
+                            if [[ -f "$REVERSE_FILE" ]]; then
+                                # Create seamless concatenation with re-encoding for compatibility
+                                echo "🔗 Combining forward and reverse for seamless loop..."
+                                
+                                # Re-encode original to match reverse format exactly
+                                TEMP_ORIGINAL="${OUTPUT_FILE%.*}_temp_original.mp4"
+                                ffmpeg -y -i "$OUTPUT_FILE" \
+                                    -c:v libx264 -preset fast -pix_fmt yuv420p \
+                                    -r 30 -an \
+                                    "$TEMP_ORIGINAL" >/dev/null 2>&1
+                                
+                                if [[ -f "$TEMP_ORIGINAL" ]]; then
+                                    # Now concatenate with matching formats
+                                    echo "file '$TEMP_ORIGINAL'" > /tmp/concat_list.txt
+                                    echo "file '$REVERSE_FILE'" >> /tmp/concat_list.txt
+                                    
+                                    ffmpeg -y -f concat -safe 0 -i /tmp/concat_list.txt \
+                                        -c:v libx264 -preset fast -pix_fmt yuv420p \
+                                        "$FINAL_OUTPUT" >/dev/null 2>&1
+                                    
+                                    if [[ -f "$FINAL_OUTPUT" ]]; then
+                                        # Replace original with final version
+                                        mv "$FINAL_OUTPUT" "$OUTPUT_FILE"
+                                        rm -f "$REVERSE_FILE" "$TEMP_ORIGINAL" /tmp/concat_list.txt
+                                        echo "✅ Reverse playback applied successfully - video duration doubled!"
+                                    else
+                                        echo "⚠️ Failed to combine forward and reverse versions"
+                                        rm -f "$REVERSE_FILE" "$TEMP_ORIGINAL" /tmp/concat_list.txt
+                                    fi
+                                else
+                                    echo "⚠️ Failed to re-encode original video"
+                                    rm -f "$REVERSE_FILE" /tmp/concat_list.txt
+                                fi
+                            else
+                                echo "⚠️ Failed to create reverse version"
+                            fi
+                        else
+                            echo "⚠️ FFmpeg not available, skipping reverse playback"
+                        fi
+                    fi
+                    
                     exit 0
                 else
                     echo "❌ Failed to download Runway video"
@@ -383,6 +445,68 @@ if [[ "$USE_RUNWAY_API" != "true" ]]; then
 
     # Check if output file was created successfully
     if [[ -f "$OUTPUT_FILE" ]]; then
+        
+        # Check if reverse playback is enabled in configuration
+        REVERSE_ENABLED=$(jq -r '.video_generation.reverse_playback.enabled' "$CONFIG_FILE")
+        PLAY_FORWARD_REVERSE=$(jq -r '.video_generation.reverse_playback.play_forward_then_reverse' "$CONFIG_FILE")
+        
+        if [[ "$REVERSE_ENABLED" == "true" && "$PLAY_FORWARD_REVERSE" == "true" && "$OUTPUT_FORMAT" == "mp4" ]]; then
+            echo "🔄 Applying reverse playback to double video duration..."
+            
+            # Create temporary reverse video
+            REVERSE_FILE="${OUTPUT_FILE%.*}_reverse_temp.mp4"
+            FINAL_OUTPUT="${OUTPUT_FILE%.*}_final.mp4"
+            
+            if command -v ffmpeg >/dev/null 2>&1; then
+                # Create reverse video with proper re-encoding
+                echo "⏪ Creating reverse version with re-encoding..."
+                ffmpeg -y -i "$OUTPUT_FILE" \
+                    -vf "reverse,fps=30" \
+                    -c:v libx264 -preset fast -pix_fmt yuv420p \
+                    -an \
+                    "$REVERSE_FILE" >/dev/null 2>&1
+                
+                if [[ -f "$REVERSE_FILE" ]]; then
+                    # Create seamless concatenation with re-encoding for compatibility
+                    echo "🔗 Combining forward and reverse for seamless loop..."
+                    
+                    # Re-encode original to match reverse format exactly
+                    TEMP_ORIGINAL="${OUTPUT_FILE%.*}_temp_original.mp4"
+                    ffmpeg -y -i "$OUTPUT_FILE" \
+                        -c:v libx264 -preset fast -pix_fmt yuv420p \
+                        -r 30 -an \
+                        "$TEMP_ORIGINAL" >/dev/null 2>&1
+                    
+                    if [[ -f "$TEMP_ORIGINAL" ]]; then
+                        # Now concatenate with matching formats
+                        echo "file '$TEMP_ORIGINAL'" > /tmp/concat_list.txt
+                        echo "file '$REVERSE_FILE'" >> /tmp/concat_list.txt
+                        
+                        ffmpeg -y -f concat -safe 0 -i /tmp/concat_list.txt \
+                            -c:v libx264 -preset fast -pix_fmt yuv420p \
+                            "$FINAL_OUTPUT" >/dev/null 2>&1
+                        
+                        if [[ -f "$FINAL_OUTPUT" ]]; then
+                            # Replace original with final version
+                            mv "$FINAL_OUTPUT" "$OUTPUT_FILE"
+                            rm -f "$REVERSE_FILE" "$TEMP_ORIGINAL" /tmp/concat_list.txt
+                            echo "✅ Reverse playback applied successfully - video duration doubled!"
+                        else
+                            echo "⚠️ Failed to combine forward and reverse versions"
+                            rm -f "$REVERSE_FILE" "$TEMP_ORIGINAL" /tmp/concat_list.txt
+                        fi
+                    else
+                        echo "⚠️ Failed to re-encode original video"
+                        rm -f "$REVERSE_FILE" /tmp/concat_list.txt
+                    fi
+                else
+                    echo "⚠️ Failed to create reverse version"
+                fi
+            else
+                echo "⚠️ FFmpeg not available, skipping reverse playback"
+            fi
+        fi
+        
         echo "✅ AI-generated video background created successfully: $OUTPUT_FILE"
         echo "$OUTPUT_FILE"  # Output the filename for use by other scripts
         exit 0
