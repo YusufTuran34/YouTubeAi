@@ -1,0 +1,544 @@
+{
+  "channels": {
+    "default": {
+      "name": "Main Channel (Full Stack)",
+      "description": "Complete content creation and publishing across all platforms",
+      "capabilities": ["youtube", "twitter", "instagram", "ai_generation"],
+      "generators": {
+        "video": true,
+        "title": true,
+        "description": true,
+        "thumbnail": true,
+        "tweet": true,
+        "story": true,
+        "ai_background": true
+      },
+      "publishers": {
+        "youtube_upload": true,
+        "youtube_stream": true,
+        "twitter_post": true,
+        "instagram_story": true,
+        "instagram_feed": false
+      },
+      "processors": {
+        "video_encoding": "high_quality",
+        "audio_processing": true,
+        "ai_enhancement": true,
+        "thumbnail_optimization": true
+      },
+      "api_endpoints": {
+        "youtube": {
+          "upload_url": "https://www.googleapis.com/upload/youtube/v3/videos",
+          "stream_url": "rtmp://a.rtmp.youtube.com/live2"
+        },
+        "twitter": {
+          "api_base": "https://api.twitter.com/2",
+          "oauth_version": "2.0"
+        }
+      },
+      "content_limits": {
+        "video_max_duration": 3600,
+        "video_max_size_gb": 5,
+        "tweet_max_length": 280,
+        "thumbnail_resolution": "1280x720"
+      }
+    },
+    "youtube_only": {
+      "name": "YouTube Focused Channel",
+      "description": "Video creation and YouTube publishing with minimal social media",
+      "capabilities": ["youtube", "twitter"],
+      "generators": {
+        "video": true,
+        "title": true,
+        "description": true,
+        "thumbnail": true,
+        "tweet": true,
+        "story": false,
+        "ai_background": true
+      },
+      "publishers": {
+        "youtube_upload": true,
+        "youtube_stream": true,
+        "twitter_post": true,
+        "instagram_story": false,
+        "instagram_feed": false
+      },
+      "processors": {
+        "video_encoding": "youtube_optimized",
+        "audio_processing": true,
+        "ai_enhancement": true,
+        "thumbnail_optimization": true
+      },
+      "content_limits": {
+        "video_max_duration": 7200,
+        "video_max_size_gb": 10,
+        "tweet_max_length": 280
+      }
+    },
+    "social_only": {
+      "name": "Social Media Only Channel",
+      "description": "Social media focused content without video production",
+      "capabilities": ["twitter", "instagram"],
+      "generators": {
+        "video": false,
+        "title": false,
+        "description": false,
+        "thumbnail": false,
+        "tweet": true,
+        "story": true,
+        "ai_background": false
+      },
+      "publishers": {
+        "youtube_upload": false,
+        "youtube_stream": false,
+        "twitter_post": true,
+        "instagram_story": true,
+        "instagram_feed": true
+      },
+      "processors": {
+        "video_encoding": false,
+        "audio_processing": false,
+        "ai_enhancement": false,
+        "image_optimization": true
+      },
+      "content_limits": {
+        "tweet_max_length": 280,
+        "story_max_duration": 15,
+        "image_max_size_mb": 8
+      }
+    },
+    "minimal": {
+      "name": "Minimal Channel",
+      "description": "Basic tweet generation and posting only",
+      "capabilities": ["twitter"],
+      "generators": {
+        "video": false,
+        "title": false,
+        "description": false,
+        "thumbnail": false,
+        "tweet": true,
+        "story": false,
+        "ai_background": false
+      },
+      "publishers": {
+        "youtube_upload": false,
+        "youtube_stream": false,
+        "twitter_post": true,
+        "instagram_story": false,
+        "instagram_feed": false
+      },
+      "processors": {
+        "video_encoding": false,
+        "audio_processing": false,
+        "ai_enhancement": false,
+        "text_optimization": true
+      },
+      "content_limits": {
+        "tweet_max_length": 280
+      }
+    },
+    "test_channel": {
+      "name": "Test & Development Channel",
+      "description": "Sandbox environment for testing new features",
+      "capabilities": ["youtube", "twitter"],
+      "generators": {
+        "video": true,
+        "title": true,
+        "description": true,
+        "thumbnail": true,
+        "tweet": true,
+        "story": false,
+        "ai_background": true
+      },
+      "publishers": {
+        "youtube_upload": false,
+        "youtube_stream": false,
+        "twitter_post": false,
+        "instagram_story": false,
+        "instagram_feed": false
+      },
+      "processors": {
+        "video_encoding": "fast_preview",
+        "audio_processing": false,
+        "ai_enhancement": false,
+        "debug_mode": true
+      },
+      "content_limits": {
+        "video_max_duration": 300,
+        "video_max_size_gb": 1,
+        "tweet_max_length": 280
+      }
+    }
+  },
+  "content_types": {
+    "lofi": {
+      "name": "LoFi Radio",
+      "description": "LoFi focus music for study, work, and relaxation",
+      "hashtags": [
+        "#LoFi",
+        "#FocusMusic",
+        "#StudyMusic",
+        "#ChillBeats",
+        "#AmbientMusic"
+      ],
+      "emojis": [
+        "🎵",
+        "📚",
+        "☕",
+        "🌙",
+        "💭"
+      ],
+      "tone": "calm and relaxing",
+      "video_related": true,
+      "requires_zodiac": false,
+      "prompts": {
+        "video": "Create a tweet about this LoFi video: '{VIDEO_TITLE}'. Make it engaging for study/work focus. Include relevant hashtags and emojis. Keep it under 280 characters.",
+        "general": "Create a calming LoFi tweet about focus music, study vibes, or relaxation. Make it warm and inviting. Include relevant hashtags and emojis. Keep it under 280 characters."
+      },
+      "video_generation": {
+        "visual_tags": [
+          "lofi",
+          "study",
+          "cozy",
+          "night",
+          "city",
+          "coffee",
+          "books",
+          "relaxing",
+          "aesthetic",
+          "vintage"
+        ],
+        "background_prompt": "Create a cozy lofi study scene with warm lighting, books, coffee, and a peaceful nighttime city view. Style should be aesthetic, calming, and perfect for studying or working.",
+        "animation_style": "smooth",
+        "color_palette": "warm, muted colors with soft lighting",
+        "mood": "peaceful and productive"
+      },
+      "platform_specific": {
+        "youtube": {
+          "category_id": "10",
+          "default_privacy": "public",
+          "enable_comments": true,
+          "enable_ratings": true
+        },
+        "twitter": {
+          "optimal_posting_times": ["06:00", "12:00", "18:00"],
+          "use_threads": false,
+          "max_hashtags": 5
+        },
+        "instagram": {
+          "use_stories": true,
+          "story_duration": 15,
+          "add_music_sticker": true
+        }
+      }
+    },
+    "horoscope": {
+      "name": "Daily Horoscope",
+      "description": "Daily horoscope readings and spiritual guidance",
+      "hashtags": [
+        "#Horoscope",
+        "#DailyHoroscope",
+        "#Zodiac",
+        "#Astrology",
+        "#Spiritual"
+      ],
+      "emojis": [
+        "✨",
+        "🌟",
+        "🔮",
+        "🌙",
+        "💫"
+      ],
+      "tone": "mystical and inspiring",
+      "video_related": false,
+      "requires_zodiac": true,
+      "prompts": {
+        "daily": "Create a daily horoscope tweet for {ZODIAC_SIGN}. Make it mystical, inspiring, and include a positive message for the day. Include relevant hashtags and emojis. Keep it under 280 characters."
+      },
+      "video_generation": {
+        "visual_tags": [
+          "mystical",
+          "cosmic",
+          "stars",
+          "galaxy",
+          "crystals",
+          "spiritual",
+          "magical",
+          "celestial",
+          "ethereal"
+        ],
+        "background_prompt": "Create a mystical cosmic scene with swirling galaxies, twinkling stars, and magical ethereal elements. Include spiritual symbols and celestial beauty with deep space colors.",
+        "animation_style": "flowing",
+        "color_palette": "deep purples, blues, golds with mystical lighting",
+        "mood": "mystical and inspiring"
+      },
+      "platform_specific": {
+        "twitter": {
+          "optimal_posting_times": ["07:00", "19:00"],
+          "use_threads": false,
+          "zodiac_specific_timing": true
+        },
+        "instagram": {
+          "use_stories": true,
+          "add_zodiac_stickers": true,
+          "story_template": "horoscope_template"
+        }
+      }
+    },
+    "meditation": {
+      "name": "Meditation & Mindfulness",
+      "description": "Meditation tips, mindfulness practices, and spiritual guidance",
+      "hashtags": [
+        "#Meditation",
+        "#Mindfulness",
+        "#Zen",
+        "#InnerPeace",
+        "#Spiritual"
+      ],
+      "emojis": [
+        "🧘",
+        "🌸",
+        "🕉️",
+        "☮️",
+        "🌿"
+      ],
+      "tone": "peaceful and contemplative",
+      "video_related": false,
+      "requires_zodiac": false,
+      "prompts": {
+        "general": "Create a peaceful meditation tweet about mindfulness, inner peace, or spiritual growth. Make it calming and inspiring. Include relevant hashtags and emojis. Keep it under 280 characters."
+      },
+      "video_generation": {
+        "visual_tags": [
+          "zen",
+          "nature",
+          "water",
+          "lotus",
+          "bamboo",
+          "peaceful",
+          "serene",
+          "minimalist",
+          "calming"
+        ],
+        "background_prompt": "Create a serene zen garden scene with flowing water, lotus flowers, bamboo, and natural elements. Style should be minimalist, peaceful, and perfect for meditation.",
+        "animation_style": "gentle",
+        "color_palette": "natural greens, soft whites, earth tones",
+        "mood": "zen and tranquil"
+      },
+      "platform_specific": {
+        "youtube": {
+          "category_id": "22",
+          "default_privacy": "public",
+          "enable_comments": true
+        },
+        "twitter": {
+          "optimal_posting_times": ["06:00", "20:00"],
+          "use_calming_tone": true
+        }
+      }
+    }
+  },
+  "zodiac_signs": [
+    "aries",
+    "taurus",
+    "gemini",
+    "cancer",
+    "leo",
+    "virgo",
+    "libra",
+    "scorpio",
+    "sagittarius",
+    "capricorn",
+    "aquarius",
+    "pisces"
+  ],
+  "workflows": {
+    "video_upload": {
+      "name": "Video Upload Workflow",
+      "description": "Complete video creation and upload pipeline",
+      "required_capabilities": ["youtube"],
+      "required_generators": ["video", "title", "description"],
+      "optional_generators": ["thumbnail", "tweet"],
+      "required_publishers": ["youtube_upload"],
+      "optional_publishers": ["twitter_post"],
+      "estimated_duration_minutes": 45,
+      "steps": [
+        "generators/generate_video.sh",
+        "generators/generate_title.sh",
+        "generators/generate_description.sh",
+        "generators/generate_thumbnail.sh",
+        "processors/process_video.sh",
+        "publishers/youtube/upload_video.sh",
+        "generators/generate_tweet.sh",
+        "publishers/twitter/post_tweet.sh"
+      ]
+    },
+    "social_only": {
+      "name": "Social Media Only Workflow",
+      "description": "Social media content creation and posting",
+      "required_capabilities": ["twitter"],
+      "required_generators": ["tweet"],
+      "optional_generators": ["story"],
+      "required_publishers": ["twitter_post"],
+      "optional_publishers": ["instagram_story"],
+      "estimated_duration_minutes": 5,
+      "steps": [
+        "generators/generate_tweet.sh",
+        "publishers/twitter/post_tweet.sh",
+        "generators/generate_story.sh",
+        "publishers/instagram/post_story.sh"
+      ]
+    },
+    "full_pipeline": {
+      "name": "Full Content Pipeline",
+      "description": "Complete content creation across all platforms",
+      "required_capabilities": ["youtube", "twitter"],
+      "required_generators": ["video", "title", "description", "tweet"],
+      "optional_generators": ["thumbnail", "story"],
+      "required_publishers": ["youtube_upload", "twitter_post"],
+      "optional_publishers": ["instagram_story"],
+      "estimated_duration_minutes": 60,
+      "steps": [
+        "generators/generate_video.sh",
+        "generators/generate_title.sh",
+        "generators/generate_description.sh",
+        "generators/generate_thumbnail.sh",
+        "generators/generate_tweet.sh",
+        "processors/process_video.sh",
+        "publishers/youtube/upload_video.sh",
+        "publishers/twitter/post_tweet.sh",
+        "publishers/instagram/post_story.sh"
+      ]
+    },
+    "stream_workflow": {
+      "name": "Live Streaming Workflow",
+      "description": "Live streaming setup and promotion",
+      "required_capabilities": ["youtube"],
+      "required_generators": ["video"],
+      "optional_generators": ["tweet"],
+      "required_publishers": ["youtube_stream"],
+      "optional_publishers": ["twitter_post"],
+      "estimated_duration_minutes": 30,
+      "steps": [
+        "generators/generate_video.sh",
+        "publishers/youtube/start_stream.sh",
+        "generators/generate_tweet.sh",
+        "publishers/twitter/post_tweet.sh"
+      ]
+    }
+  },
+  "settings": {
+    "default_channel": "default",
+    "default_content_type": "lofi",
+    "default_zodiac": "aries",
+    "max_tweet_length": 280,
+    "openai_model": "gpt-3.5-turbo",
+    "max_tokens": 150,
+    "temperature": 0.8,
+    "retry_attempts": 3,
+    "timeout_seconds": 600,
+    "log_retention_days": 30,
+    "enable_analytics": true,
+    "debug_mode": false
+  },
+  "video_generation": {
+    "enabled": true,
+    "use_ai_generation": true,
+    "use_runway_api": true,
+    "fallback_to_google_drive": true,
+    "ai_model": "dall-e-3",
+    "frame_count": 4,
+    "frame_duration": 2,
+    "output_format": "mp4",
+    "resolution": "1024x1024",
+    "quality_profiles": {
+      "high_quality": {
+        "video_bitrate": "5000k",
+        "audio_bitrate": "192k",
+        "fps": 30,
+        "preset": "slow"
+      },
+      "youtube_optimized": {
+        "video_bitrate": "8000k",
+        "audio_bitrate": "256k",
+        "fps": 60,
+        "preset": "medium"
+      },
+      "fast_preview": {
+        "video_bitrate": "1000k",
+        "audio_bitrate": "128k",
+        "fps": 24,
+        "preset": "ultrafast"
+      }
+    },
+    "google_drive": {
+      "enabled": true,
+      "folder_id": "1SevV-LKA67CVmEimWUwWicdJ0Eud6nHm"
+    },
+    "openai": {
+      "enabled": true,
+      "model": "dall-e-3",
+      "quality": "standard",
+      "style": "natural"
+    },
+    "runway": {
+      "enabled": true,
+      "model": "gen3a_turbo",
+      "duration": 5,
+      "ratio": "1280:768",
+      "watermark": false,
+      "api_base_url": "https://api.dev.runwayml.com/v1"
+    }
+  },
+  "platform_apis": {
+    "youtube": {
+      "base_url": "https://www.googleapis.com/youtube/v3",
+      "upload_url": "https://www.googleapis.com/upload/youtube/v3/videos",
+      "stream_url": "rtmp://a.rtmp.youtube.com/live2",
+      "scopes": ["youtube.upload", "youtube.readonly"],
+      "rate_limits": {
+        "uploads_per_day": 6,
+        "api_calls_per_hour": 10000
+      }
+    },
+    "twitter": {
+      "base_url": "https://api.twitter.com/2",
+      "oauth_version": "2.0",
+      "rate_limits": {
+        "tweets_per_hour": 300,
+        "api_calls_per_15min": 300
+      }
+    },
+    "instagram": {
+      "base_url": "https://graph.instagram.com",
+      "rate_limits": {
+        "posts_per_hour": 25,
+        "stories_per_hour": 50
+      }
+    }
+  },
+  "error_handling": {
+    "max_retries": 3,
+    "retry_delay_seconds": 5,
+    "exponential_backoff": true,
+    "fallback_strategies": {
+      "ai_generation_failed": "use_google_drive",
+      "youtube_upload_failed": "retry_with_lower_quality",
+      "twitter_post_failed": "save_for_manual_review"
+    }
+  },
+  "monitoring": {
+    "enable_metrics": true,
+    "metrics_retention_days": 90,
+    "alert_thresholds": {
+      "failure_rate_percent": 10,
+      "average_duration_minutes": 60,
+      "api_error_rate_percent": 5
+    },
+    "webhook_notifications": {
+      "enabled": false,
+      "webhook_url": "",
+      "events": ["pipeline_failed", "api_quota_exceeded"]
+    }
+  }
+} 

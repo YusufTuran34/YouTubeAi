@@ -6,12 +6,12 @@ ACTION="${1:-help}"
 case "$ACTION" in
   "clean")
     echo "🧹 Proje temizleniyor..."
-    cd sh_scripts && ./auto_cleanup.sh
+    cd sh_scripts && ./utilities/auto_cleanup.sh
     ;;
   "deep-clean")
     echo "🔥 DERİN TEMİZLİK BAŞLATILIYOR..."
     echo "🧹 Otomatik temizlik çalıştırılıyor..."
-    cd sh_scripts && ./auto_cleanup.sh
+    cd sh_scripts && ./utilities/auto_cleanup.sh
     cd ..
     echo "🗑️ Geçici dosyalar temizleniyor..."
     rm -rf /tmp/chrome_profile_* 2>/dev/null || true
@@ -29,7 +29,7 @@ case "$ACTION" in
     ;;
   "test")
     echo "🧪 Hızlı testler çalıştırılıyor..."
-    cd sh_scripts && ./quick_test.sh "${2:-all}"
+    cd sh_scripts && ./utilities/quick_test.sh "${2:-all}"
     ;;
   "start")
     echo "🚀 Proje başlatılıyor..."
@@ -63,13 +63,45 @@ case "$ACTION" in
     echo "📋 Son log dosyaları:"
     find . -name "*.log" -mtime -1 2>/dev/null | head -5
     ;;
+  # NEW WORKFLOW COMMANDS USING NEW ARCHITECTURE
+  "workflow")
+    echo "🎬 Workflow çalıştırılıyor..."
+    cd sh_scripts
+    shift # Remove "workflow" from arguments
+    ./orchestrators/run_workflow.sh "$@"
+    ;;
+  "social")
+    echo "📱 Hızlı sosyal medya paylaşımı..."
+    cd sh_scripts
+    ./orchestrators/quick_social_post.sh "${2:-lofi}" "${3:-}"
+    ;;
+  "video")
+    echo "🎥 Tam video pipeline..."
+    cd sh_scripts
+    ./orchestrators/full_video_pipeline.sh "${2:-lofi}" "${3:-default}"
+    ;;
+  "channels")
+    echo "📋 Mevcut kanallar:"
+    cd sh_scripts
+    ./core/channel_manager.sh
+    ;;
+  "pipeline-status")
+    echo "📊 Pipeline durumu:"
+    cd sh_scripts
+    ./core/pipeline_manager.sh list "${2:-10}"
+    ;;
+  "pipeline-cleanup")
+    echo "🧹 Eski pipeline logları temizleniyor..."
+    cd sh_scripts
+    ./core/pipeline_manager.sh cleanup "${2:-7}"
+    ;;
   "help")
     echo "🎯 PROJE YÖNETİM SİSTEMİ"
     echo "========================"
     echo ""
     echo "Kullanım: $0 [komut] [parametre]"
     echo ""
-    echo "Komutlar:"
+    echo "🔧 Sistem Komutları:"
     echo "  clean     - Sistem temizliği (Chrome, Java, port)"
     echo "  deep-clean - Derin temizlik (Chrome, Java, port)"
     echo "  test      - Hızlı testler (tweet, horoscope, lofi, config, all)"
@@ -77,15 +109,37 @@ case "$ACTION" in
     echo "  restart   - Projeyi yeniden başlat"
     echo "  status    - Sistem durumunu kontrol et"
     echo "  logs      - Son log dosyalarını göster"
-    echo "  help      - Bu yardım mesajını göster"
     echo ""
-    echo "Örnekler:"
-    echo "  $0 clean              # Sistem temizliği"
-    echo "  $0 deep-clean         # Derin temizlik"
-    echo "  $0 test tweet         # Sadece tweet testi"
-    echo "  $0 test all           # Tüm testler"
-    echo "  $0 start              # Projeyi başlat"
-    echo "  $0 restart            # Yeniden başlat"
+    echo "🎬 Yeni Workflow Komutları:"
+    echo "  workflow <type> <channel> [content] [params] - Tam workflow çalıştır"
+    echo "  social [content_type] [zodiac_sign]          - Hızlı sosyal medya paylaşımı"
+    echo "  video [content_type] [channel]               - Tam video pipeline"
+    echo "  channels                                     - Mevcut kanalları listele"
+    echo "  pipeline-status [count]                      - Pipeline durumunu göster"
+    echo "  pipeline-cleanup [days]                      - Eski logları temizle"
+    echo ""
+    echo "🎯 Workflow Türleri:"
+    echo "  video_upload   - Video oluşturma ve YouTube yükleme"
+    echo "  social_only    - Sadece sosyal medya içeriği"
+    echo "  full_pipeline  - Tam içerik pipeline'ı"
+    echo "  stream_workflow - Canlı yayın workflow'ı"
+    echo ""
+    echo "📋 Mevcut Kanallar:"
+    echo "  default, youtube_only, social_only, minimal, test_channel"
+    echo ""
+    echo "🎨 İçerik Türleri:"
+    echo "  lofi, horoscope, meditation"
+    echo ""
+    echo "📖 Örnekler:"
+    echo "  $0 clean                              # Sistem temizliği"
+    echo "  $0 test all                           # Tüm testler"
+    echo "  $0 social lofi                        # Hızlı LoFi tweet"
+    echo "  $0 social horoscope aries             # Koç burcu horoskopu"
+    echo "  $0 video lofi default                 # LoFi video pipeline"
+    echo "  $0 workflow video_upload youtube_only lofi  # YouTube'a LoFi video"
+    echo "  $0 workflow social_only minimal horoscope zodiac_sign=gemini"
+    echo "  $0 channels                           # Kanal listesi"
+    echo "  $0 pipeline-status 5                  # Son 5 pipeline"
     ;;
   *)
     echo "❌ Geçersiz komut: $ACTION"

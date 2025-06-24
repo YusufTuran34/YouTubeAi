@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hızlı Aksiyonlar - YouTube AI Scheduler</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Hızlı Aksiyonlar - YouTubeAI Scheduler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         .quick-action-card {
             transition: all 0.3s ease;
@@ -52,120 +53,228 @@
     </style>
 </head>
 <body class="bg-light">
-    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    <div th:replace="fragments/navbar :: navbar"></div>
     
-    <!-- Header -->
-    <div class="header-gradient text-center">
-        <div class="container">
-            <h1 class="display-4"><i class="fas fa-bolt"></i> Hızlı Aksiyonlar</h1>
-            <p class="lead">En sık kullanılan işlemlere tek tıkla ulaşın</p>
-        </div>
-    </div>
-
-    <div class="container">
-        <!-- Quick Stats -->
-        <div class="row mb-5">
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <i class="fas fa-video fa-2x mb-2"></i>
-                    <h4>Video</h4>
-                    <p class="mb-0">Üretim</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <i class="fas fa-share-alt fa-2x mb-2"></i>
-                    <h4>Sosyal</h4>
-                    <p class="mb-0">Medya</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <i class="fas fa-broadcast-tower fa-2x mb-2"></i>
-                    <h4>Canlı</h4>
-                    <p class="mb-0">Yayın</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <i class="fas fa-robot fa-2x mb-2"></i>
-                    <h4>AI</h4>
-                    <p class="mb-0">Powered</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Actions Grid -->
+    <div class="container-fluid">
         <div class="row">
-            <div th:each="action : ${quickActions}" class="col-lg-6 mb-4">
-                <div class="card quick-action-card h-100 border-0 shadow"
-                     th:if="${action != null}"
-                     onclick="window.location.href='/actions/run/' + this.dataset.actionId"
-                     th:data-action-id="${action.id}">
-                    <div class="card-body text-center p-4">
-                        <div class="action-icon" th:text="${action.iconEmoji}">🎵</div>
-                        <h3 class="card-title text-primary" th:text="${action.displayName}">Action Name</h3>
-                        <p class="card-text text-muted mb-4" th:text="${action.description}">Action description</p>
-                        
-                        <!-- Parameters Info -->
-                        <div th:if="${action.parameters.size() > 0}" class="mb-3">
-                            <small class="text-warning">
-                                <i class="fas fa-sliders-h"></i> 
-                                <span th:text="${action.parameters.size()}">0</span> parametre gerekli
-                            </small>
-                        </div>
-                        <div th:if="${action.parameters.size() == 0}" class="mb-3">
-                            <small class="text-success">
-                                <i class="fas fa-check-circle"></i> Parametre gerektirmez
-                            </small>
-                        </div>
-                        
-                        <button class="btn btn-quick w-100">
-                            <i class="fas fa-rocket"></i> Hemen Çalıştır
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- All Actions Link -->
-        <div class="text-center mt-5 mb-5">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <h5 class="card-title">Daha Fazla Aksiyon mu Arıyorsunuz?</h5>
-                    <p class="card-text text-muted">Tüm mevcut aksiyonları kategoriler halinde keşfedin</p>
-                    <a href="/actions" class="btn btn-outline-primary btn-lg">
-                        <i class="fas fa-th-large"></i> Tüm Aksiyonları Görüntüle
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="row mt-5">
             <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history"></i> Nasıl Çalışır?
-                        </h5>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="h3 mb-0">⚡ Hızlı Aksiyonlar</h1>
+                    <div class="btn-group" role="group">
+                        <a href="/actions" class="btn btn-outline-primary">📋 Tüm Aksiyonlar</a>
+                        <a href="/logs" class="btn btn-outline-info">📊 Loglar</a>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 text-center">
-                                <i class="fas fa-mouse-pointer fa-3x text-primary mb-3"></i>
-                                <h6>1. Aksiyon Seçin</h6>
-                                <p class="text-muted">Yapmak istediğiniz işlemi seçin</p>
+                </div>
+                
+                <!-- New Architecture Workflows -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-primary">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">🔄 Yeni Architecture Workflows</h5>
                             </div>
-                            <div class="col-md-4 text-center">
-                                <i class="fas fa-edit fa-3x text-success mb-3"></i>
-                                <h6>2. Parametreleri Girin</h6>
-                                <p class="text-muted">Gerekli bilgileri doldurun</p>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card h-100 border-info">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-rocket fa-2x text-primary mb-2"></i>
+                                                <h6>🚀 Full Pipeline</h6>
+                                                <p class="small text-muted">Komple içerik üretimi + tüm platform paylaşımı</p>
+                                                <button class="btn btn-primary btn-sm" onclick="executeQuickAction('full_pipeline_workflow', {workflow_type: 'full_pipeline', channel: 'default', content_type: 'lofi'})">Çalıştır</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card h-100 border-success">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-video fa-2x text-success mb-2"></i>
+                                                <h6>🎬 Video Upload</h6>
+                                                <p class="small text-muted">Video üretimi + YouTube upload</p>
+                                                <button class="btn btn-success btn-sm" onclick="executeQuickAction('video_upload_workflow', {workflow_type: 'video_upload', channel: 'youtube_only', content_type: 'lofi'})">Çalıştır</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card h-100 border-warning">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-share-alt fa-2x text-warning mb-2"></i>
+                                                <h6>📱 Social Only</h6>
+                                                <p class="small text-muted">Sadece sosyal medya paylaşımı</p>
+                                                <button class="btn btn-warning btn-sm" onclick="executeQuickAction('social_only_workflow', {workflow_type: 'social_only', channel: 'minimal', content_type: 'lofi'})">Çalıştır</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card h-100 border-danger">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-bolt fa-2x text-danger mb-2"></i>
+                                                <h6>⚡ Hızlı Tweet</h6>
+                                                <p class="small text-muted">Anında tweet üret ve paylaş</p>
+                                                <button class="btn btn-danger btn-sm" onclick="executeQuickAction('quick_social_post', {content_type: 'lofi'})">Çalıştır</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-4 text-center">
-                                <i class="fas fa-cogs fa-3x text-warning mb-3"></i>
-                                <h6>3. Otomatik Çalışır</h6>
-                                <p class="text-muted">Sistem her şeyi otomatik yapar</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Channel Selection -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">📡 Kanal Seçimi</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-2 mb-2">
+                                        <button class="btn btn-outline-primary w-100" onclick="setChannel('default')">🔥 Default</button>
+                                    </div>
+                                    <div class="col-md-2 mb-2">
+                                        <button class="btn btn-outline-danger w-100" onclick="setChannel('youtube_only')">📺 YouTube Only</button>
+                                    </div>
+                                    <div class="col-md-2 mb-2">
+                                        <button class="btn btn-outline-info w-100" onclick="setChannel('social_only')">📱 Social Only</button>
+                                    </div>
+                                    <div class="col-md-2 mb-2">
+                                        <button class="btn btn-outline-warning w-100" onclick="setChannel('minimal')">⚡ Minimal</button>
+                                    </div>
+                                    <div class="col-md-2 mb-2">
+                                        <button class="btn btn-outline-secondary w-100" onclick="setChannel('test_channel')">🧪 Test</button>
+                                    </div>
+                                    <div class="col-md-2 mb-2">
+                                        <span class="badge bg-primary" id="currentChannel">default</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Content Type Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">🎵 İçerik Türü Hızlı Aksiyonlar</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card border-info">
+                                            <div class="card-header bg-info text-white">
+                                                <h6 class="mb-0">🎵 LoFi Content</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <button class="btn btn-info btn-sm me-2 mb-2" onclick="executeQuickAction('quick_social_post', {content_type: 'lofi'})">⚡ Tweet</button>
+                                                <button class="btn btn-primary btn-sm me-2 mb-2" onclick="executeQuickAction('video_upload_workflow', {workflow_type: 'video_upload', content_type: 'lofi'})">🎬 Video</button>
+                                                <button class="btn btn-success btn-sm mb-2" onclick="executeQuickAction('full_pipeline_workflow', {workflow_type: 'full_pipeline', content_type: 'lofi'})">🚀 Full</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card border-success">
+                                            <div class="card-header bg-success text-white">
+                                                <h6 class="mb-0">🧘 Meditation Content</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <button class="btn btn-info btn-sm me-2 mb-2" onclick="executeQuickAction('quick_social_post', {content_type: 'meditation'})">⚡ Tweet</button>
+                                                <button class="btn btn-primary btn-sm me-2 mb-2" onclick="executeQuickAction('video_upload_workflow', {workflow_type: 'video_upload', content_type: 'meditation'})">🎬 Video</button>
+                                                <button class="btn btn-success btn-sm mb-2" onclick="executeQuickAction('full_pipeline_workflow', {workflow_type: 'full_pipeline', content_type: 'meditation'})">🚀 Full</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card border-warning">
+                                            <div class="card-header bg-warning text-dark">
+                                                <h6 class="mb-0">⭐ Horoscope Content</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <select id="zodiacSelect" class="form-select form-select-sm mb-2">
+                                                    <option value="aries">♈ Koç</option>
+                                                    <option value="taurus">♉ Boğa</option>
+                                                    <option value="gemini">♊ İkizler</option>
+                                                    <option value="cancer">♋ Yengeç</option>
+                                                    <option value="leo">♌ Aslan</option>
+                                                    <option value="virgo">♍ Başak</option>
+                                                    <option value="libra">♎ Terazi</option>
+                                                    <option value="scorpio">♏ Akrep</option>
+                                                    <option value="sagittarius">♐ Yay</option>
+                                                    <option value="capricorn">♑ Oğlak</option>
+                                                    <option value="aquarius">♒ Kova</option>
+                                                    <option value="pisces">♓ Balık</option>
+                                                </select>
+                                                <button class="btn btn-warning btn-sm me-2 mb-2" onclick="executeHoroscopeAction('quick_social_post')">⚡ Tweet</button>
+                                                <button class="btn btn-primary btn-sm me-2 mb-2" onclick="executeHoroscopeAction('video_upload_workflow')">🎬 Video</button>
+                                                <button class="btn btn-success btn-sm mb-2" onclick="executeHoroscopeAction('full_pipeline_workflow')">🚀 Full</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Utilities -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">🔧 Sistem Utilities</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 mb-2">
+                                        <button class="btn btn-outline-success w-100" onclick="executeQuickAction('test_architecture', {test_type: 'all'})">
+                                            🧪 Architecture Test
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <button class="btn btn-outline-warning w-100" onclick="executeQuickAction('cleanup_system', {})">
+                                            🧹 System Cleanup
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <button class="btn btn-outline-info w-100" onclick="executeQuickAction('quick_test', {test_type: 'all'})">
+                                            ⚡ Quick Test
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <a href="/logs" class="btn btn-outline-primary w-100">
+                                            📊 View Logs
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Execution Status -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">📈 Execution Status</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="executionStatus" class="alert alert-info" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>
+                                    <span id="statusMessage">İşlem çalıştırılıyor...</span>
+                                </div>
+                                <div id="executionResult" class="mt-3" style="display: none;">
+                                    <h6>Son İşlem Sonucu:</h6>
+                                    <pre id="resultOutput" class="bg-dark text-light p-3 rounded"></pre>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -174,6 +283,94 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentChannel = 'default';
+        
+        function setChannel(channel) {
+            currentChannel = channel;
+            document.getElementById('currentChannel').textContent = channel;
+            
+            // Update all channel buttons
+            document.querySelectorAll('button[onclick*="setChannel"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-primary');
+            });
+            
+            // Highlight current channel
+            event.target.classList.remove('btn-outline-primary');
+            event.target.classList.add('btn-primary');
+        }
+        
+        function executeQuickAction(actionId, params = {}) {
+            // Add current channel to params
+            params.channel = currentChannel;
+            
+            showExecutionStatus(`🔄 ${actionId} çalıştırılıyor...`);
+            
+            fetch('/actions/execute-quick', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    actionId: actionId,
+                    parameters: params
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideExecutionStatus();
+                showExecutionResult(data);
+            })
+            .catch(error => {
+                hideExecutionStatus();
+                showExecutionResult({
+                    success: false,
+                    message: 'Hata: ' + error.message
+                });
+            });
+        }
+        
+        function executeHoroscopeAction(actionType) {
+            const zodiacSign = document.getElementById('zodiacSelect').value;
+            const params = {
+                content_type: 'horoscope',
+                zodiac_sign: zodiacSign,
+                channel: currentChannel
+            };
+            
+            if (actionType === 'quick_social_post') {
+                executeQuickAction('quick_social_post', params);
+            } else if (actionType === 'video_upload_workflow') {
+                params.workflow_type = 'video_upload';
+                executeQuickAction('video_upload_workflow', params);
+            } else if (actionType === 'full_pipeline_workflow') {
+                params.workflow_type = 'full_pipeline';
+                executeQuickAction('full_pipeline_workflow', params);
+            }
+        }
+        
+        function showExecutionStatus(message) {
+            document.getElementById('statusMessage').textContent = message;
+            document.getElementById('executionStatus').style.display = 'block';
+            document.getElementById('executionResult').style.display = 'none';
+        }
+        
+        function hideExecutionStatus() {
+            document.getElementById('executionStatus').style.display = 'none';
+        }
+        
+        function showExecutionResult(result) {
+            const resultDiv = document.getElementById('executionResult');
+            const outputPre = document.getElementById('resultOutput');
+            
+            outputPre.textContent = JSON.stringify(result, null, 2);
+            resultDiv.style.display = 'block';
+            
+            // Auto-scroll to result
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html> 
