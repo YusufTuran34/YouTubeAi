@@ -22,13 +22,19 @@ if [ -z "$OPENAI_API_KEY" ] && [ -f "$SCRIPT_DIR/common.sh" ]; then
     load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE" 2>/dev/null || true
 fi
 
-# JSON configuration file path
-CONFIG_FILE="$SCRIPT_DIR/content_configs.json"
+# JSON configuration file path - get parent directory of generators
+SH_SCRIPTS_DIR="$(dirname "$SCRIPT_DIR")"
+CONFIG_FILE="$SH_SCRIPTS_DIR/content_configs.json"
 
 # Spring Boot context path fix
 if [[ ! -f "$CONFIG_FILE" ]]; then
-    # Try from main directory (Spring Boot context)
+    # Try from main project directory (Spring Boot context)
     CONFIG_FILE="sh_scripts/content_configs.json"
+fi
+
+# Last resort: try relative to current working directory
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    CONFIG_FILE="../content_configs.json"
 fi
 
 # Check if JSON config file exists

@@ -133,22 +133,29 @@ def generate_tweet(content_type="lofi", zodiac_sign="aries"):
     try:
         print(f"📝 Advanced tweet generation başlatılıyor...")
         
-        # Call the advanced tweet generation script
-        cmd = f"bash generate_tweet_advanced.sh {content_type} {zodiac_sign}"
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=os.getcwd())
+        # Get script directory and construct path to tweet generator
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        sh_scripts_dir = os.path.dirname(os.path.dirname(script_dir))
+        tweet_script = os.path.join(sh_scripts_dir, "generators", "generate_tweet_advanced.sh")
+        
+        # Call the advanced tweet generation script with full path
+        cmd = f"bash {tweet_script} {content_type} {zodiac_sign}"
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=sh_scripts_dir)
         
         if result.returncode == 0:
             print("✅ Advanced tweet generation başarılı!")
             
-            # Read the generated tweet
-            if os.path.exists('generated_tweet.txt'):
-                with open('generated_tweet.txt', 'r') as f:
+            # Read the generated tweet from sh_scripts directory
+            tweet_file = os.path.join(sh_scripts_dir, 'generated_tweet.txt')
+            if os.path.exists(tweet_file):
+                with open(tweet_file, 'r') as f:
                     tweet_text = f.read().strip()
                 
                 # VIDEO_TITLE placeholder'ını değiştir
                 video_title = ""
-                if os.path.exists('generated_title.txt'):
-                    with open('generated_title.txt', 'r') as f:
+                title_file = os.path.join(sh_scripts_dir, 'generated_title.txt')
+                if os.path.exists(title_file):
+                    with open(title_file, 'r') as f:
                         video_title = f.read().strip()
                 
                 # Placeholder'ı doğru video title ile değiştir
@@ -173,8 +180,9 @@ def generate_tweet(content_type="lofi", zodiac_sign="aries"):
                 
                 # Read content type for logging
                 content_type_used = content_type
-                if os.path.exists('last_content_type.txt'):
-                    with open('last_content_type.txt', 'r') as f:
+                content_type_file = os.path.join(sh_scripts_dir, 'last_content_type.txt')
+                if os.path.exists(content_type_file):
+                    with open(content_type_file, 'r') as f:
                         content_type_used = f.read().strip()
                 
                 print(f"🎯 Content Type: {content_type_used}")
@@ -382,110 +390,134 @@ def main():
     print(f"✅ Chrome driver başlatıldı! Süre: {setup_time:.1f}s")
     
     try:
-        # Login process
-        print("🔐 MANUEL GİRİŞ SÜRECİ BAŞLIYOR")
+        # Check if already logged in by trying to access compose page
+        print("🔍 LOGIN DURUMU KONTROL EDİLİYOR...")
         print("=" * 40)
         
-        print("🌐 Twitter giriş sayfası açılıyor...")
-        driver.get("https://twitter.com/login")
-        time.sleep(3)
-        
-        # Enter email
-        print(f"📧 Email adresi giriliyor: {username}")
-        print("🔍 Email alanı aranıyor...")
-        email_selectors = [
-            'input[autocomplete="username"]',
-            'input[name="text"]',
-            'input[type="email"]',
-            'input[placeholder*="email"]',
-            'input[data-testid*="email"]',
-            'input[autocomplete="email"]',
-            'input[name="session[username_or_email]"]',
-            'input[name="username"]'
-        ]
-        email_field = None
-        for selector in email_selectors:
-            try:
-                print(f"🔍 Email selector deneniyor: {selector}")
-                email_field = WebDriverWait(driver, 5).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, selector))
-                )
-                print(f"✅ Email alanı bulundu: {selector}")
-                break
-            except Exception as e:
-                print(f"❌ Email selector başarısız: {selector}")
-                continue
-        if not email_field:
-            print("❌ Hiçbir email selector'ı çalışmadı!")
-            driver.quit()
-            sys.exit(1)
-        print("📝 Email alanı temizleniyor...")
-        email_field.clear()
-        print("📝 Email alanı temizlendi")
-        email_field.send_keys(str(username) if username else "")
-        print("📧 Email adresi yazıldı")
-        print("➡️ Enter tuşu ile devam ediliyor...")
-        email_field.send_keys(Keys.RETURN)
-        print("✅ Enter tuşu gönderildi")
-        print("⏳ 2 saniye bekleniyor...")
-        time.sleep(2)
-        print("✅ Bekleme tamamlandı")
-        
-        # Check if username field is required
-        print("🔍 Sonraki alan tespit ediliyor...")
         try:
-            print("🔍 Username alanı aranıyor...")
-            username_field = WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type="text"]'))
-            )
-            print("🔍 Tespit edilen alan tipi: username")
-            print("👤 Kullanıcı adı alanı tespit edildi, kullanıcı adı giriliyor...")
-            print(f"✅ Kullanıcı adı alanı bulundu: input[type=\"text\"]")
-            username_field.clear()
-            print("📝 Username alanı temizlendi")
-            username_field.send_keys(str(handle) if handle else "")
-            print(f"👤 Twitter kullanıcı adı giriliyor: {handle}")
+            print("🌐 Tweet compose sayfası kontrol ediliyor...")
+            driver.get("https://x.com/compose/post")
+            time.sleep(3)
+            
+            # Check if we can access compose page (means we're logged in)
+            current_url = driver.current_url
+            print(f"🌐 Aktif URL: {current_url}")
+            
+            if "compose" in current_url or "home" in current_url:
+                print("✅ Zaten login olmuş! Login işlemini atlıyoruz...")
+                print(f"🌐 Sayfa başlığı: {driver.title}")
+                # Skip login process, go directly to tweet posting
+                pass
+            else:
+                print("❌ Login gerekli, giriş işlemi başlatılıyor...")
+                raise Exception("Login required")
+                
+        except Exception as login_check_error:
+            print(f"🔄 Login kontrolü başarısız: {login_check_error}")
+            print("🔐 MANUEL GİRİŞ SÜRECİ BAŞLIYOR")
+            print("=" * 40)
+            
+            print("🌐 Twitter giriş sayfası açılıyor...")
+            driver.get("https://twitter.com/login")
+            time.sleep(3)
+            
+            # Enter email
+            print(f"📧 Email adresi giriliyor: {username}")
+            print("🔍 Email alanı aranıyor...")
+            email_selectors = [
+                'input[autocomplete="username"]',
+                'input[name="text"]',
+                'input[type="email"]',
+                'input[placeholder*="email"]',
+                'input[data-testid*="email"]',
+                'input[autocomplete="email"]',
+                'input[name="session[username_or_email]"]',
+                'input[name="username"]'
+            ]
+            email_field = None
+            for selector in email_selectors:
+                try:
+                    print(f"🔍 Email selector deneniyor: {selector}")
+                    email_field = WebDriverWait(driver, 5).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+                    )
+                    print(f"✅ Email alanı bulundu: {selector}")
+                    break
+                except Exception as e:
+                    print(f"❌ Email selector başarısız: {selector}")
+                    continue
+            if not email_field:
+                print("❌ Hiçbir email selector'ı çalışmadı!")
+                driver.quit()
+                sys.exit(1)
+            print("📝 Email alanı temizleniyor...")
+            email_field.clear()
+            print("📝 Email alanı temizlendi")
+            email_field.send_keys(str(username) if username else "")
+            print("📧 Email adresi yazıldı")
             print("➡️ Enter tuşu ile devam ediliyor...")
-            username_field.send_keys(Keys.RETURN)
-            print("✅ Username Enter tuşu gönderildi")
+            email_field.send_keys(Keys.RETURN)
+            print("✅ Enter tuşu gönderildi")
             print("⏳ 2 saniye bekleniyor...")
             time.sleep(2)
-            print("✅ Username bekleme tamamlandı")
-        except Exception as e:
-            print(f"🔍 Username alanı gerekli değil: {e}")
-            print("🔍 Şifre alanına geçiliyor...")
-        
-        # Enter password
-        print("🔑 Şifre alanı aranıyor...")
-        password_field = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type="password"]'))
-        )
-        print("✅ Şifre alanı bulundu: input[type=\"password\"]")
-        password_field.clear()
-        print("📝 Şifre alanı temizlendi")
-        password_field.send_keys(password)
-        print("🔐 Şifre otomatik olarak giriliyor...")
-        print("🚀 Enter tuşu ile giriş yapılıyor...")
-        password_field.send_keys(Keys.RETURN)
-        print("✅ Şifre Enter tuşu gönderildi")
-        print("⏳ 5 saniye bekleniyor...")
-        time.sleep(5)
-        print("✅ Login bekleme tamamlandı")
-        print("🔄 Login sonrası işlemler başlıyor...")
-        # Her durumda compose/post'a git
-        print("🌐 https://x.com/compose/post adresine yönlendiriliyor...")
-        print("🔄 driver.get() çağrısı yapılıyor...")
-        try:
-            driver.get("https://x.com/compose/post")
-            print("✅ driver.get() başarılı!")
-        except Exception as e:
-            print(f"❌ driver.get() hatası: {e}")
-            raise e
-        print("⏳ 3 saniye bekleniyor...")
-        time.sleep(3)
-        print("✅ Bekleme tamamlandı!")
-        print(f"🌐 Aktif URL: {driver.current_url}")
-        print(f"🌐 Sayfa başlığı: {driver.title}")
+            print("✅ Bekleme tamamlandı")
+            
+            # Check if username field is required
+            print("🔍 Sonraki alan tespit ediliyor...")
+            try:
+                print("🔍 Username alanı aranıyor...")
+                username_field = WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type="text"]'))
+                )
+                print("🔍 Tespit edilen alan tipi: username")
+                print("👤 Kullanıcı adı alanı tespit edildi, kullanıcı adı giriliyor...")
+                print(f"✅ Kullanıcı adı alanı bulundu: input[type=\"text\"]")
+                username_field.clear()
+                print("📝 Username alanı temizlendi")
+                username_field.send_keys(str(handle) if handle else "")
+                print(f"👤 Twitter kullanıcı adı giriliyor: {handle}")
+                print("➡️ Enter tuşu ile devam ediliyor...")
+                username_field.send_keys(Keys.RETURN)
+                print("✅ Username Enter tuşu gönderildi")
+                print("⏳ 2 saniye bekleniyor...")
+                time.sleep(2)
+                print("✅ Username bekleme tamamlandı")
+            except Exception as e:
+                print(f"🔍 Username alanı gerekli değil: {e}")
+                print("🔍 Şifre alanına geçiliyor...")
+            
+            # Enter password
+            print("🔑 Şifre alanı aranıyor...")
+            password_field = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type="password"]'))
+            )
+            print("✅ Şifre alanı bulundu: input[type=\"password\"]")
+            password_field.clear()
+            print("📝 Şifre alanı temizlendi")
+            password_field.send_keys(password)
+            print("🔐 Şifre otomatik olarak giriliyor...")
+            print("🚀 Enter tuşu ile giriş yapılıyor...")
+            password_field.send_keys(Keys.RETURN)
+            print("✅ Şifre Enter tuşu gönderildi")
+            print("⏳ 5 saniye bekleniyor...")
+            time.sleep(5)
+            print("✅ Login bekleme tamamlandı")
+            print("🔄 Login sonrası işlemler başlıyor...")
+            
+            # After login, go to compose page
+            print("🌐 https://x.com/compose/post adresine yönlendiriliyor...")
+            print("🔄 driver.get() çağrısı yapılıyor...")
+            try:
+                driver.get("https://x.com/compose/post")
+                print("✅ driver.get() başarılı!")
+            except Exception as e:
+                print(f"❌ driver.get() hatası: {e}")
+                raise e
+            print("⏳ 3 saniye bekleniyor...")
+            time.sleep(3)
+            print("✅ Bekleme tamamlandı!")
+            print(f"🌐 Aktif URL: {driver.current_url}")
+            print(f"🌐 Sayfa başlığı: {driver.title}")
         print("🔄 Aktif element alınıyor...")
         # Tweet kutusu bulma
         active = driver.switch_to.active_element

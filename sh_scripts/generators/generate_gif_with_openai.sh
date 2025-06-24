@@ -2,8 +2,10 @@
 # generate_gif_with_openai.sh - Use OpenAI images API to create a short looping GIF.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SH_SCRIPTS_DIR="$(dirname "$SCRIPT_DIR")"
+export SH_SCRIPTS_DIR
 CONFIG_OVERRIDE="${1:-}"
-source "$SCRIPT_DIR/common.sh"
+source "$SH_SCRIPTS_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
 PROMPT="${AI_GIF_PROMPT:-lofi city at night animation}"

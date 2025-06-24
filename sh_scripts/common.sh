@@ -4,7 +4,18 @@
 load_channel_config() {
   channel="${1:-default}"
   override="$2"
-  script_dir="$(cd "$(dirname "$0")" && pwd)"
+  # Use SH_SCRIPTS_DIR if available, otherwise detect it from common.sh location
+  if [ -n "$SH_SCRIPTS_DIR" ]; then
+    script_dir="$SH_SCRIPTS_DIR"
+  else
+    # Get sh_scripts directory from common.sh location
+    common_dir="$(cd "$(dirname "$0")" && pwd)"
+    case "$common_dir" in
+      */sh_scripts) script_dir="$common_dir" ;;
+      */sh_scripts/*) script_dir="$(dirname "$common_dir")" ;;
+      *) script_dir="$(pwd)/sh_scripts" ;;
+    esac
+  fi
   cfg_dir="$script_dir/configs"
   base_conf="$cfg_dir/base.conf"
   env_file="${CHANNEL_ENV_FILE:-$script_dir/channels.env}"
@@ -67,8 +78,35 @@ load_channel_config() {
   fi
 
   if [ -n "$override" ] && [ -f "$override" ]; then
-    echo "[DEBUG] Override config yükleniyor: $override"
+    echo "[DEBUG] Override config yükleniyor: $override" >&2
     . "$override"
+  fi
+  
+  # Load content configs for video generation
+  load_content_configs "$script_dir"
+}
+
+# Load content_configs.json settings as environment variables
+load_content_configs() {
+  script_dir="$1"
+  content_config_file="$script_dir/content_configs.json"
+  
+  if [ -f "$content_config_file" ] && command -v jq >/dev/null 2>&1; then
+    echo "[DEBUG] Content configs yükleniyor: $content_config_file" >&2
+    
+    # Extract video generation settings
+    export USE_AI_VIDEO_GENERATION=$(jq -r '.video_generation.use_ai_generation // false' "$content_config_file" | sed 's/true/1/; s/false/0/')
+    export USE_OPENAI_GIF=$(jq -r '.video_generation.openai.enabled // false' "$content_config_file" | sed 's/true/1/; s/false/0/')
+    export USE_GOOGLE_DRIVE=$(jq -r '.video_generation.google_drive.enabled // false' "$content_config_file" | sed 's/true/1/; s/false/0/')
+    export DRIVE_FOLDER_ID=$(jq -r '.video_generation.google_drive.folder_id // ""' "$content_config_file")
+    export USE_RUNWAY_API=$(jq -r '.video_generation.use_runway_api // false' "$content_config_file" | sed 's/true/1/; s/false/0/')
+    export RUNWAY_MODEL=$(jq -r '.video_generation.runway.model // "gen3a_turbo"' "$content_config_file")
+    export RUNWAY_DURATION=$(jq -r '.video_generation.runway.duration // 5' "$content_config_file")
+    export RUNWAY_RATIO=$(jq -r '.video_generation.runway.ratio // "1280:768"' "$content_config_file")
+    
+    echo "[DEBUG] Video generation flags: USE_AI_VIDEO_GENERATION=$USE_AI_VIDEO_GENERATION, USE_OPENAI_GIF=$USE_OPENAI_GIF, USE_GOOGLE_DRIVE=$USE_GOOGLE_DRIVE" >&2
+  else
+    echo "[DEBUG] Content config file bulunamadı veya jq mevcut değil: $content_config_file" >&2
   fi
 }
 

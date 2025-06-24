@@ -6,12 +6,14 @@ escape_json() {
 set -e
 set -x
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SH_SCRIPTS_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+export SH_SCRIPTS_DIR
 CONFIG_OVERRIDE="${1:-}"
-source "$SCRIPT_DIR/common.sh"
+source "$SH_SCRIPTS_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 CONFIG_FILE="$CONFIG_OVERRIDE"
 
-LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
+LATEST_FILE="$SH_SCRIPTS_DIR/latest_output_video.txt"
 [ -f "$LATEST_FILE" ] && OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
 echo "VIDEO LATEST_FILE :$LATEST_FILE "
 if [ -z "$CLIENT_ID" ] || [ -z "$CLIENT_SECRET" ] || [ -z "$REFRESH_TOKEN" ]; then
@@ -52,7 +54,7 @@ fi
 
 if [ -z "$VIDEO_DESCRIPTION" ]; then
   echo "⚠️  VIDEO_DESCRIPTION boş, otomatik oluşturuluyor..."
-  VIDEO_DESCRIPTION=$(bash "$SCRIPT_DIR/generate_description.sh" "$CONFIG_FILE")
+  VIDEO_DESCRIPTION=$(bash "$SH_SCRIPTS_DIR/generators/generate_description.sh" "$CONFIG_FILE")
   if [ -z "$VIDEO_DESCRIPTION" ]; then
     echo "HATA: VIDEO_DESCRIPTION üretilemedi!"
     exit 1
@@ -62,7 +64,7 @@ fi
 # Thumbnail eksikse otomatik oluştur
 if [ -z "$THUMB_PATH" ] || [ ! -f "$THUMB_PATH" ]; then
   echo "⚠️  Thumbnail eksik veya bulunamadı, otomatik oluşturuluyor..."
-  bash "$SCRIPT_DIR/generate_thumbnail_from_video.sh" "$CONFIG_FILE"
+  bash "$SH_SCRIPTS_DIR/generators/generate_thumbnail_from_video.sh" "$CONFIG_FILE"
 
   if [ ! -f "$THUMB_PATH" ]; then
     echo "HATA: Thumbnail oluşturulamadı: $THUMB_PATH"
@@ -73,7 +75,7 @@ fi
 # VIDEO_TITLE eksikse otomatik oluştur
 if [ -z "$VIDEO_TITLE" ]; then
   echo "⚠️  VIDEO_TITLE boş, otomatik oluşturuluyor..."
-  VIDEO_TITLE=$(bash "$SCRIPT_DIR/generate_title.sh" "$CONFIG_FILE")
+  VIDEO_TITLE=$(bash "$SH_SCRIPTS_DIR/generators/generate_title.sh" "$CONFIG_FILE")
   if [ -z "$VIDEO_TITLE" ]; then
     echo "HATA: VIDEO_TITLE oluşturulamadı!"
     exit 1
@@ -252,4 +254,4 @@ fi
 echo "✅ Video yüklendi! YouTube Link: https://youtu.be/$VIDEO_ID"
 
 # Video URL'ini dosyaya kaydet (her zaman)
-echo "https://youtu.be/$VIDEO_ID" > "$SCRIPT_DIR/latest_video_url.txt"
+echo "https://youtu.be/$VIDEO_ID" > "$SH_SCRIPTS_DIR/latest_video_url.txt"

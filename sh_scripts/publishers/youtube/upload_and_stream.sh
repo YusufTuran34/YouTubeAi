@@ -2,11 +2,13 @@
 # upload_and_stream.sh - output.mp4 ve remote_stream.sh dosyasını sunucuya gönderip yayın başlatır
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SH_SCRIPTS_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+export SH_SCRIPTS_DIR
 CONFIG_OVERRIDE="${1:-}"
-source "$SCRIPT_DIR/common.sh"
+source "$SH_SCRIPTS_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
-LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
+LATEST_FILE="$SH_SCRIPTS_DIR/latest_output_video.txt"
 [ -f "$LATEST_FILE" ] && OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
 
 RTMP_URL="${YOUTUBE_STREAM_URL}/${YOUTUBE_STREAM_KEY}"
@@ -20,12 +22,12 @@ if [ ! -f "$PEM_FILE" ]; then
     exit 1
 fi
 
-LOCAL_CONFIG_FILE="${CONFIG_OVERRIDE:-$SCRIPT_DIR/configs/base.conf}"
-LOCAL_ENV_FILE="${CHANNEL_ENV_FILE:-$SCRIPT_DIR/channels.env}"
+LOCAL_CONFIG_FILE="${CONFIG_OVERRIDE:-$SH_SCRIPTS_DIR/configs/base.conf}"
+LOCAL_ENV_FILE="${CHANNEL_ENV_FILE:-$SH_SCRIPTS_DIR/channels.env}"
 
 echo ">> Dosyalar sunucuya gönderiliyor..."
 ssh -i "$PEM_FILE" "$REMOTE_USER@$REMOTE_HOST" "mkdir -p $REMOTE_DIR/configs"
-scp -i "$PEM_FILE" "$OUTPUT_VIDEO" remote_stream.sh common.sh "$LOCAL_ENV_FILE" "$LATEST_FILE" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/"
+scp -i "$PEM_FILE" "$OUTPUT_VIDEO" "$SH_SCRIPTS_DIR/utilities/remote_stream.sh" "$SH_SCRIPTS_DIR/common.sh" "$LOCAL_ENV_FILE" "$LATEST_FILE" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/"
 scp -i "$PEM_FILE" "$LOCAL_CONFIG_FILE" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/configs/base.conf"
 if [ $? -ne 0 ]; then
     echo "HATA: Dosya gönderimi başarısız oldu!" >&2

@@ -2,11 +2,13 @@
 # generate_title.sh - Use OpenAI to create an SEO friendly title
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SH_SCRIPTS_DIR="$(dirname "$SCRIPT_DIR")"
+export SH_SCRIPTS_DIR
 CONFIG_OVERRIDE="${1:-}"
-source "$SCRIPT_DIR/common.sh"
-load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
+source "$SH_SCRIPTS_DIR/common.sh" 2>/dev/null
+load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE" 2>/dev/null
 
-LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
+LATEST_FILE="$SH_SCRIPTS_DIR/latest_output_video.txt"
 [ -f "$LATEST_FILE" ] && OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
 
 DURATION_SOURCE="${OUTPUT_VIDEO:-$VIDEO_FILE}"

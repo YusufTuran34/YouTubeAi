@@ -2,8 +2,10 @@
 # cleanup_outputs.sh - remove previous output video and mp3 files
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SH_SCRIPTS_DIR="$(dirname "$SCRIPT_DIR")"
+export SH_SCRIPTS_DIR
 CONFIG_OVERRIDE="${1:-}"
-source "$SCRIPT_DIR/common.sh"
+source "$SH_SCRIPTS_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
 # Generated videoları saklamak için artık silmiyoruz

@@ -2,11 +2,13 @@
 # generate_thumbnail_from_video.sh
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SH_SCRIPTS_DIR="$(dirname "$SCRIPT_DIR")"
+export SH_SCRIPTS_DIR
 CONFIG_OVERRIDE="${1:-}"
-. "$SCRIPT_DIR/common.sh"
+. "$SH_SCRIPTS_DIR/common.sh"
 load_channel_config "${CHANNEL:-default}" "$CONFIG_OVERRIDE"
 
-LATEST_FILE="$SCRIPT_DIR/latest_output_video.txt"
+LATEST_FILE="$SH_SCRIPTS_DIR/latest_output_video.txt"
 [ -f "$LATEST_FILE" ] && OUTPUT_VIDEO="$(cat "$LATEST_FILE")"
 
 # Ensure OUTPUT_VIDEO is set and exists
