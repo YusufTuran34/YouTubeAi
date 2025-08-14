@@ -112,3 +112,26 @@ Add `INSTAGRAM_USERNAME` and `INSTAGRAM_PASSWORD` to your channel configuration.
 sh sh_scripts/post_instagram_story.sh
 ```
 Pipeline helper scripts accept `--post-instagram` to run this automatically after uploading or streaming.
+
+## Story Video Composer API
+
+A new `/video-composer/story` endpoint generates a narrated video from a title and desired duration. It asks ChatGPT to craft a story and image prompts for each scene, then returns a composition plan with the rendered video path.
+
+Example request:
+
+```bash
+curl -X POST http://localhost:8080/video-composer/story \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Kayıp Hazine","durationSeconds":600}'
+```
+
+Configure limits and model options in `application.properties` using the `video-composer.*` keys.
+
+## Docker
+
+Build and run the service using Docker:
+
+```bash
+docker build -t youtube-ai .
+docker run -e OPENAI_API_KEY=your-key -p 8080:8080 youtube-ai
+```
