@@ -2,6 +2,20 @@
 
 This project includes shell scripts for generating and uploading YouTube videos automatically. The title and description generation scripts now support using OpenAI for smarter, SEO friendly content.
 
+
+## Video Composer Service
+A new `/video-composer/story` endpoint generates story scripts based on a title and desired duration.
+It uses ChatGPT to craft a narrative and per-scene visual prompts sized to the requested length.
+Request example:
+
+```bash
+curl -X POST http://localhost:8080/video-composer/story \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Mysterious Forest","duration":"10m"}'
+```
+
+The response contains structured scenes that can be used to synthesize video and audio tracks.
+
 ## Configuration
 Shared settings live in `sh_scripts/configs/base.conf`. Example keys:
 
@@ -112,3 +126,11 @@ Add `INSTAGRAM_USERNAME` and `INSTAGRAM_PASSWORD` to your channel configuration.
 sh sh_scripts/post_instagram_story.sh
 ```
 Pipeline helper scripts accept `--post-instagram` to run this automatically after uploading or streaming.
+
+## Docker
+A Dockerfile is provided for production deployments:
+
+```bash
+docker build -t youtube-ai .
+docker run -e OPENAI_API_KEY=... -p 8080:8080 youtube-ai
+```
